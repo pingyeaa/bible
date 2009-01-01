@@ -1147,11 +1147,10 @@ class ApiController extends Controller
 
     /**
      * 检测新版本
-     * @param $user_id
      * @param $version
      * @param $platform
      */
-    public function actionVersion($user_id, $version, $platform)
+    public function actionVersion($version, $platform)
     {
         try {
             if($platform == 'android') {
