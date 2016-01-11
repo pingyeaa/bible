@@ -15,7 +15,7 @@ class Module extends \yii\base\Module
             parent::behaviors(),[
                 'authenticator' => [
                     'class' => HttpBasicAuth::className(),
-                    'auth' => 'app\models\BasicAuth::auth',
+                    'auth' => 'common\models\User::findByPasswordResetToken',
                 ]
             ]
         );

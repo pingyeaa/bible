@@ -85,19 +85,18 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * Finds user by password reset token
      *
-     * @param string $token password reset token
+     * @param string $username
+     * @param string $password
+     * @internal param string $token password reset token
      * @return static|null
      */
-    public static function findByPasswordResetToken($token)
+    public static function findByPasswordResetToken($username = '', $password = '')
     {
-        if (!static::isPasswordResetTokenValid($token)) {
+        $username_o = \yii::$app->params['Authorization']['username'];
+        $password_o = \yii::$app->params['Authorization']['password'];
+        if($username !== $username_o || $password_o !== $password)
             return null;
-        }
-
-        return static::findOne([
-            'password_reset_token' => $token,
-            'status' => self::STATUS_ACTIVE,
-        ]);
+        return new User();
     }
 
     /**
