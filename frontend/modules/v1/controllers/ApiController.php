@@ -13,7 +13,9 @@ class ApiController extends Controller
     {
         parent::beforeAction($action);
 
-        $sign = $_REQUEST['sign'];
+        $sign = isset($_REQUEST['sign']) ? $_REQUEST['sign'] : null;
+        if(!$sign)
+            $this->code(412, -1, '签名错误');
         unset($_REQUEST['sign']);
         $secretKey = yii::$app->params['Authorization']['sign']['secret_key'];
         if(!yii::$app->sign->validate($_REQUEST, $sign, $secretKey))
