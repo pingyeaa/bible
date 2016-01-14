@@ -3,26 +3,39 @@
 use yii\db\Schema;
 use yii\db\Migration;
 
-class m130524_201442_init extends Migration
+class m160113_091918_create_user extends Migration
 {
     public function up()
     {
-        $tableOptions = null;
         $this->createTable('public.user', [
             'id' => $this->primaryKey(),
-            'username' => $this->integer(20)->notNull()->unique(),
+            'nation_code' => $this->integer()->notNull(),
+            'username' => $this->string(20)->notNull()->unique(),
             'password' => $this->string(32)->notNull(),
             'nickname' => $this->string()->notNull(),
             'gender' => $this->integer(1),
             'birthday' => $this->date(),
             'believe_date' => $this->date(),
+            'status' => $this->integer()->defaultValue(1),  //1-正常　0-关闭
             'created_at' => $this->integer()->notNull(),
             'last_login_at' => $this->integer()->notNull(),
-        ], $tableOptions);
+        ]);
+        return true;
     }
 
     public function down()
     {
-        $this->dropTable('public.user');
+        return $this->dropTable('public.user');
     }
+
+    /*
+    // Use safeUp/safeDown to run migration code within a transaction
+    public function safeUp()
+    {
+    }
+
+    public function safeDown()
+    {
+    }
+    */
 }

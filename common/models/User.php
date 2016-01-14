@@ -12,14 +12,6 @@ use yii\web\IdentityInterface;
  *
  * @property integer $id
  * @property string $username
- * @property string $password_hash
- * @property string $password_reset_token
- * @property string $email
- * @property string $auth_key
- * @property integer $status
- * @property integer $created_at
- * @property integer $updated_at
- * @property string $password write-only password
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -41,17 +33,6 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return [
             TimestampBehavior::className(),
-        ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function rules()
-    {
-        return [
-            ['status', 'default', 'value' => self::STATUS_ACTIVE],
-            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]],
         ];
     }
 
@@ -80,6 +61,18 @@ class User extends ActiveRecord implements IdentityInterface
     public static function findByUsername($username)
     {
         return static::findOne(['username' => $username, 'status' => self::STATUS_ACTIVE]);
+    }
+
+    /**
+     * Finds user by username
+     *
+     * @param string $username
+     * @param $nation_code
+     * @return static|null
+     */
+    public static function findByUsernameAndNationCode($username, $nation_code)
+    {
+        return static::findOne(['username' => $username, 'nation_code' => $nation_code]);
     }
 
     /**
@@ -183,5 +176,17 @@ class User extends ActiveRecord implements IdentityInterface
     public function removePasswordResetToken()
     {
         $this->password_reset_token = null;
+    }
+
+    /**
+     * 创建用户
+     * @param array $data 用户数据
+     * @return bool
+     */
+    public function add($data)
+    {
+        $this->isNewRecord = true;
+        $this->attributes = $data;
+        return $this->save();
     }
 }
