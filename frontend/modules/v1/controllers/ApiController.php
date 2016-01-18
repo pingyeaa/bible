@@ -13,6 +13,10 @@ class ApiController extends Controller
     {
         parent::beforeAction($action);
 
+        //验证签名
+        if(in_array(yii::$app->request->getUserIP(), yii::$app->params['WithoutVerifyIP'])){
+            return true;
+        }
         $sign = isset($_REQUEST['sign']) ? $_REQUEST['sign'] : null;
         if(!$sign)
             $this->code(412, -1, '签名错误');
@@ -20,6 +24,13 @@ class ApiController extends Controller
         $secretKey = yii::$app->params['Authorization']['sign']['secret_key'];
         if(!yii::$app->sign->validate($_REQUEST, $sign, $secretKey))
             $this->code(412, -1, '签名错误');
+
+        //验证时间戳
+        $timestamp = isset($_REQUEST['timestamp']) ? $_REQUEST['timestamp'] : null;
+        if(!$timestamp)
+            $this->code(406, -1, '请求已过期');
+
+
         return true;
     }
 
@@ -57,13 +68,13 @@ class ApiController extends Controller
     {
         try{
             if(User::findByUsernameAndNationCode($phone, $nation_code))
-                $this->code(200, 1, '用户已经注册');
+                $this->code(450, '用户已经注册');
 
             //发短信
             $code = rand(100000, 999999);
             $resultArray = yii::$app->tencent->sendSMS($phone, sprintf('【活石APP】%s为您的登录验证码，请于30分钟内填写。如非本人操作，请忽略本短信。', $code), "86");
             if($resultArray['result'] != 0)
-                $this->code(200, 2, '短信发送失败');
+                $this->code(451, '短信发送失败');
 
             //记录短信
             $smsBinding = new SmsRegisterBinding();
@@ -75,20 +86,19 @@ class ApiController extends Controller
                 'create_at' => time(),
             ]);
             if(!$result)
-                $this->code(200, 100, '其他错误');
+                $this->code(452, '其他错误');
 
-            $this->code(200, 0, 'OK');
+            $this->code(200, 'OK');
         }catch (yii\base\Exception $e){
             echo $e->getMessage();
         }
     }
 
-    protected function code($status = 200, $code = 0, $message = '', $data = [])
+    protected function code($status = 200, $message = '', $data = [])
     {
         $response = yii::$app->getResponse();
         $response->setStatusCode($status);
         $response->data = [
-            'code' => $code,
             'message' => $message,
             'data' => $data
         ];
