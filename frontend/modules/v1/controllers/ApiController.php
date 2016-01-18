@@ -19,16 +19,16 @@ class ApiController extends Controller
         }
         $sign = isset($_REQUEST['sign']) ? $_REQUEST['sign'] : null;
         if(!$sign)
-            $this->code(412, -1, '签名错误');
+            $this->code(412, '签名错误');
         unset($_REQUEST['sign']);
         $secretKey = yii::$app->params['Authorization']['sign']['secret_key'];
         if(!yii::$app->sign->validate($_REQUEST, $sign, $secretKey))
-            $this->code(412, -1, '签名错误');
+            $this->code(412, '签名错误');
 
         //验证时间戳
         $timestamp = isset($_REQUEST['timestamp']) ? $_REQUEST['timestamp'] : null;
         if(!$timestamp)
-            $this->code(406, -1, '请求已过期');
+            $this->code(406, '请求已过期');
 
 
         return true;
