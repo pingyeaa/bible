@@ -181,7 +181,7 @@ class Request extends \yii\base\Request
         if ($result !== false) {
             list ($route, $params) = $result;
             if ($this->_queryParams === null) {
-                $_GET = $params + $_GET; // preserve numeric keys
+                $_GET = $params + $_REQUEST; // preserve numeric keys
             } else {
                 $this->_queryParams = $params + $this->_queryParams;
             }
