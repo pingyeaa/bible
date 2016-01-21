@@ -49,11 +49,22 @@ class ApiController extends Controller
         return $response;
     }
 
-    public function actionUserRegister()
+    /**
+     * 用户注册
+     * @param $nation_code
+     * @param $phone
+     * @param $sms_code
+     * @param $password
+     */
+    public function actionUserRegister($nation_code, $phone, $sms_code, $password)
     {
         try{
-//        yii::$app->tencent->sendSMS();
-            yii::$app->tencent->registerAccount('86-15989529532', '123456789');
+            $sms = new SmsRegisterBinding();
+            $result = $sms->validateSmsCode($nation_code, $phone, $sms_code);
+            if(!$result)
+                $this->code(450, '验证码不存在或已过期');
+            $result = yii::$app->tencent->registerAccount(sprintf('%s-%s', $nation_code, $phone), $password);
+            var_dump($result);exit;
         }catch (yii\base\Exception $e) {
 
         }
@@ -64,7 +75,7 @@ class ApiController extends Controller
      * @param　int $phone 手机号
      * @param int $nation_code　国家码
      */
-    public function actionRegisterCode($phone, $nation_code)
+    public function actionRegisterCode($phone, $nation_code = 86)
     {
         try{
             if(User::findByUsernameAndNationCode($phone, $nation_code))

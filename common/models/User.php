@@ -1,7 +1,7 @@
 <?php
 namespace common\models;
 
-use Yii;
+use yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -85,8 +85,9 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findByPasswordResetToken($username = '', $password = '')
     {
-        $username_o = \yii::$app->params['Authorization']['username'];
-        $password_o = \yii::$app->params['Authorization']['password'];
+        $username_o = yii::$app->params['Authorization']['username'];
+        $password_o = yii::$app->params['Authorization']['password'];
+
         if($username !== $username_o || $password_o !== $password)
             return null;
         return new User();
@@ -105,7 +106,7 @@ class User extends ActiveRecord implements IdentityInterface
         }
 
         $timestamp = (int) substr($token, strrpos($token, '_') + 1);
-        $expire = Yii::$app->params['user.passwordResetTokenExpire'];
+        $expire = yii::$app->params['user.passwordResetTokenExpire'];
         return $timestamp + $expire >= time();
     }
 
