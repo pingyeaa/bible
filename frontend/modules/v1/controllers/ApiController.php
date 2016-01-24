@@ -54,9 +54,8 @@ class ApiController extends Controller
      * @param $phone
      * @param $sms_code
      * @param $password
-     * @param $confirm_password
      */
-    public function actionUserRegister($nation_code = '86', $phone, $sms_code, $password, $confirm_password)
+    public function actionUserRegister($nation_code = '86', $phone, $sms_code, $password)
     {
         try{
             //验证码正确性
@@ -65,16 +64,19 @@ class ApiController extends Controller
             if(!$result)
                 $this->code(450, '验证码不存在或已过期');
 
+            if(strlen($password) < 8 || strlen($password) > 16)
+                $this->code(451, '密码长度必须8-16位');
+
             //验证用户是否已存在
             $user = new User();
             $result = $user->isExists($nation_code, $phone);
             if($result)
-                $this->code(451, '已经注册');
+                $this->code(452, '已经注册');
 
             //同步账号到腾讯云
             $result = yii::$app->tencent->accountImport(sprintf('%s-%s', $nation_code, $phone));
             if(0 != $result['ErrorCode'])
-                $this->code(452, '腾讯云同步错误');
+                $this->code(453, '腾讯云同步错误');
 
             //开启事务
             $trans = yii::$app->db->beginTransaction();
@@ -89,7 +91,7 @@ class ApiController extends Controller
             ]);
             if(!$userId) {
                 $trans->rollBack();
-                $this->code(452, '用户入库失败');
+                $this->code(453, '用户入库失败');
             }
 
             //选择用户标识入库
@@ -97,7 +99,7 @@ class ApiController extends Controller
             $nickInfo = $nickListObj->getInfoByOrderNo($userId);
             if(!$nickInfo){
                 $trans->rollBack();
-                $this->code(452, '未找到用户标识');
+                $this->code(453, '未找到用户标识');
             }
             $userNickObj = new UserNickBinding();
             $result = $userNickObj->add([
@@ -107,7 +109,7 @@ class ApiController extends Controller
             ]);
             if(!$result) {
                 $trans->rollBack();
-                $this->code(452, 'nick_id入库失败');
+                $this->code(453, 'nick_id入库失败');
             }
             $trans->commit();
             $this->code(200);
