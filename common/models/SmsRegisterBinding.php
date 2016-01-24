@@ -33,8 +33,9 @@ class SmsRegisterBinding extends ActiveRecord
      * @param integer $expireTime　过期时间/s
      * @return bool
      */
-    public function validateSmsCode($nationCode, $phone, $smsCode, $expireTime = 30)
+    public function validateSmsCode($nationCode, $phone, $smsCode, $expireTime = 1800)
     {
-        return $this->find()->where('nation_code = :nation_code and phone = :phone and code = :code and create_at >= :validTime', ['nation_code' => $nationCode, 'phone' => $phone, 'code' => $smsCode, 'validTime' => time() - $expireTime])->one();
+        $result = $this->find()->where('nation_code = :nation_code and phone = :phone and code = :code and create_at >= :validTime', ['nation_code' => $nationCode, 'phone' => $phone, 'code' => $smsCode, 'validTime' => time() - $expireTime])->one();
+        return $result;
     }
 }

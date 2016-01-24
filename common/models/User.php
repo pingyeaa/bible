@@ -12,6 +12,7 @@ use yii\web\IdentityInterface;
  *
  * @property integer $id
  * @property string $username
+ * @property string $created_at
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -24,6 +25,14 @@ class User extends ActiveRecord implements IdentityInterface
     public static function tableName()
     {
         return 'public.user';
+    }
+
+    public function rules()
+    {
+        return [
+            [['created_at', 'nation_code', 'username', 'password'], 'required'],
+            [['nickname', 'gender', 'birthday', 'believe_date', 'status', 'last_login_at'], 'safe'],
+        ];
     }
 
     /**
@@ -188,6 +197,19 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $this->isNewRecord = true;
         $this->attributes = $data;
-        return $this->save();
+        if(!$this->save())
+            return false;
+        return $this->id;
+    }
+
+    /**
+     * 查询用户是否存在
+     * @param $nationCode
+     * @param $phone
+     * @return null|static
+     */
+    public function isExists($nationCode, $phone)
+    {
+        return $this->find()->where('nation_code = :nation_code and username = :phone', ['nation_code' => $nationCode, 'phone' => $phone])->one();
     }
 }

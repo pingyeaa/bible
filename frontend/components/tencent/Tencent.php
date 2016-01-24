@@ -17,14 +17,33 @@ class Tencent extends yii\base\Component
     public $userSig;
     public $identifier;
     public $appKey;
+    public $privateKey;
+    public $publicKey;
+    public $smsSdkAppId;
 
     protected $api;
+    protected $smsApi;
 
     public function init()
     {
+        //初始化独立模式SDK
         $this->api = new \TimRestAPI();
         $this->api->init($this->sdkAppId, $this->identifier);
-        $this->api->set_user_sig($this->userSig);
+
+        //初始化托管模式SDK，目前用于兼容短信
+        $this->smsApi = new \TimRestAPI();
+        $this->smsApi->init($this->smsSdkAppId, $this->identifier);
+        $this->smsApi->set_user_sig($this->userSig);
+
+        //签名
+        $tls = new TlsSig();
+        $tls->setAppid($this->sdkAppId);
+        $tls->setPrivateKey(file_get_contents($this->privateKey));
+        $tls->setPublicKey(file_get_contents($this->publicKey));
+        $userSig = $tls->genSig($this->identifier);
+        yii::info('userSig: ' . $userSig, 'tls-sig');
+
+        $this->api->set_user_sig($userSig);
     }
 
     /**
@@ -38,7 +57,7 @@ class Tencent extends yii\base\Component
      */
     public function sendSMS($phone, $message, $nationCode = "86", $type = "0", $ext = '')
     {
-        $result = $this->api->sms_send_to_single($nationCode, $phone, $type, $message, md5($this->appKey .$phone), $ext);
+        $result = $this->smsApi->sms_send_to_single($nationCode, $phone, $type, $message, md5($this->appKey .$phone), $ext);
         yii::trace('短信发送结果：' . json_encode($result), 'yii\sendSMS');
         return $result;
     }
@@ -53,7 +72,22 @@ class Tencent extends yii\base\Component
     public function registerAccount($userName, $password, $IdentifierType = 1)
     {
         $result = $this->api->register_account($userName, $IdentifierType, $password);
+        if(!$result)
+            yii::info(sprintf('注册失败：%s 用户名：%s 密码：%s IdentyifierType: %s', $userName, $password, $IdentifierType), 'tencentRegisterAccount');
         return $this->parseData($result);
+    }
+
+    /**
+     * 独立模式同步账号
+     * @param $identifier
+     * @return bool
+     */
+    public function accountImport($identifier)
+    {
+        $result = $this->api->account_import($identifier, '', '');
+        if(!$result)
+            yii::info('account_import failed ! identifier: '.$identifier, 'account_import');
+        return $result;
     }
 
     /**

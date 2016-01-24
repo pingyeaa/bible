@@ -2,8 +2,12 @@
 
 namespace app\modules\v1\controllers;
 
+use common\models\Nick;
+use common\models\NickList;
 use common\models\SmsRegisterBinding;
 use common\models\User;
+use common\models\UserNickBinding;
+use common\models\Users;
 use yii;
 use yii\web\Controller;
 
@@ -30,23 +34,18 @@ class ApiController extends Controller
         if(!$timestamp)
             $this->code(406, '请求已过期');
 
-
         return true;
     }
 
     public function actionUserLogin()
     {
-
-        $response = yii::$app->getResponse();
-        $response->data = [
-            'code' => 2,
-            'data' => [
-                'user_id' => 1,
-                'user_name' => 'Enoch',
-                'sex' => 1,
-            ],
-        ];
-        return $response;
+//        $nick = new NickList();
+//        $nick->generate(130);exit;
+//        $result = yii::$app->tencent->registerAccount(sprintf('%s-%s', $nation_code, $phone), $password);
+//        echo 1;exit;
+//        $this->code(200, null, ['user_id' => 99, 'sex' => 0]);
+//        $this->code(450, '手机号码不正确', ['user_id' => 99, 'sex' => 0]);
+        return true;
     }
 
     /**
@@ -55,18 +54,65 @@ class ApiController extends Controller
      * @param $phone
      * @param $sms_code
      * @param $password
+     * @param $confirm_password
      */
-    public function actionUserRegister($nation_code, $phone, $sms_code, $password)
+    public function actionUserRegister($nation_code = '86', $phone, $sms_code, $password, $confirm_password)
     {
         try{
+            //验证码正确性
             $sms = new SmsRegisterBinding();
-            $result = $sms->validateSmsCode($nation_code, $phone, $sms_code);
+            $result = $sms->validateSmsCode($nation_code, $phone, $sms_code, 1800);
             if(!$result)
                 $this->code(450, '验证码不存在或已过期');
-            $result = yii::$app->tencent->registerAccount(sprintf('%s-%s', $nation_code, $phone), $password);
-            var_dump($result);exit;
-        }catch (yii\base\Exception $e) {
 
+            //验证用户是否已存在
+            $user = new User();
+            $result = $user->isExists($nation_code, $phone);
+            if($result)
+                $this->code(451, '已经注册');
+
+            //同步账号到腾讯云
+            $result = yii::$app->tencent->accountImport(sprintf('%s-%s', $nation_code, $phone));
+            if(0 != $result['ErrorCode'])
+                $this->code(452, '腾讯云同步错误');
+
+            //开启事务
+            $trans = yii::$app->db->beginTransaction();
+
+            //添加新用户
+            $userId = $user->add([
+                'nation_code' => $nation_code,
+                'username' => $phone,
+                'password' => md5($password . yii::$app->params['User']['password']['saltValue']),
+                'created_at' => time(),
+                'updated_at' => time()
+            ]);
+            if(!$userId) {
+                $trans->rollBack();
+                $this->code(452, '用户入库失败');
+            }
+
+            //选择用户标识入库
+            $nickListObj = new NickList();
+            $nickInfo = $nickListObj->getInfoByOrderNo($userId);
+            if(!$nickInfo){
+                $trans->rollBack();
+                $this->code(452, '未找到用户标识');
+            }
+            $userNickObj = new UserNickBinding();
+            $result = $userNickObj->add([
+                'user_id' => $userId,
+                'nick_list_id' => $nickInfo['id'],
+                'create_at' => time()
+            ]);
+            if(!$result) {
+                $trans->rollBack();
+                $this->code(452, 'nick_id入库失败');
+            }
+            $trans->commit();
+            $this->code(200);
+        }catch (yii\base\Exception $e) {
+            $this->code(500, $e->getMessage());
         }
     }
 
@@ -109,10 +155,13 @@ class ApiController extends Controller
     {
         $response = yii::$app->getResponse();
         $response->setStatusCode($status);
-        $response->data = [
-            'message' => $message,
-            'data' => $data
-        ];
+        if(200 == $status) {
+            $response->data = $data;
+        }else {
+            $response->data = [
+                'message' => $message,
+            ];
+        }
         yii::$app->end(0, $response);
     }
 }
