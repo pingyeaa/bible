@@ -174,7 +174,7 @@ class ApiController extends Controller
         //图片同步七牛
         $is = yii::$app->qiniu->upload($filePath, $fileName);
         if(!$is) {
-            $this->code(480, '同步图片服务器失败');
+            $this->code(480, '同步图片服务器失败：' . yii::$app->qiniu->getError());
         }
 
         //图片入库

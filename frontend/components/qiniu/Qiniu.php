@@ -19,6 +19,8 @@ class Qiniu extends yii\base\Component
     public $bucket;
     public $domain;
 
+    protected $message;
+
     /**
      * 上传文件
      * @param string $filePath 本地文件路径
@@ -32,9 +34,8 @@ class Qiniu extends yii\base\Component
         $uploadMgr = new UploadManager();
         list($ret, $err) = $uploadMgr->putFile($token, $key, $filePath);
         if ($err !== null) {
-            var_dump($err);
-        } else {
-            var_dump($ret);
+            $this->addError(json_encode($err));
+            return false;
         }
         return true;
     }
@@ -42,5 +43,16 @@ class Qiniu extends yii\base\Component
     public function getDomain()
     {
         return $this->domain;
+    }
+
+    protected function addError($message)
+    {
+        $this->message = $message;
+        return true;
+    }
+
+    public function getError()
+    {
+        return $this->message;
     }
 }
