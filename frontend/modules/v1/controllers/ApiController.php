@@ -66,9 +66,6 @@ class ApiController extends Controller
             if(!$result)
                 $this->code(450, '验证码不存在或已过期');
 
-            if(strlen($password) < 8 || strlen($password) > 16)
-                $this->code(451, '密码长度必须8-16位');
-
             //验证用户是否已存在
             $user = new User();
             $result = $user->isExists($nation_code, $phone);
@@ -87,7 +84,7 @@ class ApiController extends Controller
             $userId = $user->add([
                 'nation_code' => $nation_code,
                 'username' => $phone,
-                'password' => md5($password . yii::$app->params['User']['password']['saltValue']),
+                'password' => $password,
                 'created_at' => time(),
                 'updated_at' => time()
             ]);
