@@ -18,7 +18,8 @@
         "yiisoft/yii2": ">=2.0.6",
         "yiisoft/yii2-bootstrap": "*",
         "yiisoft/yii2-swiftmailer": "*",
-        "ivanovyordan/yii2-migration": "*"
+        "ivanovyordan/yii2-migration": "*",
+        "qiniu/php-sdk": "^7.0"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

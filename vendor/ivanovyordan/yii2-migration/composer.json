@@ -1,0 +1,28 @@
+{
+	"name": "ivanovyordan/yii2-migration",
+	"description": "Yii 2 composer module migration helper",
+	"keywords": ["yii2", "migration"],
+	"type": "library",
+	"license": "MIT",
+	"minimum-stability": "dev",
+	"support": {
+		"issues": "https://github.com/ivanovyordan/yii2-migration/issues?state=open",
+		"source": "https://github.com/ivanovyordan/yii2-migration"
+	},
+	"authors": [
+		{
+			"name": "Yordan Ivanov",
+			"email": "mail@ivanovyordan.com",
+			"homepage": "http://ivanovyordan.com"
+		}
+	],
+	"require": {
+		"php": ">=5.4.0",
+		"yiisoft/yii2": "*"
+	},
+	"autoload": {
+		"psr-4": {
+			"ivanovyordan\\migration\\": ""
+		}
+	}
+}

@@ -39,6 +39,7 @@ class ApiController extends Controller
 
     public function actionUserLogin()
     {
+//        yii::$app->qiniu->upload('/home/enoch/图片/test.png', time());
 //        $nick = new NickList();
 //        $nick->generate(130);exit;
 //        $result = yii::$app->tencent->registerAccount(sprintf('%s-%s', $nation_code, $phone), $password);
@@ -112,7 +113,7 @@ class ApiController extends Controller
                 $this->code(453, 'nick_id入库失败');
             }
             $trans->commit();
-            $this->code(200);
+            $this->code(200, 'ok', ['user_id' => $userId]);
         }catch (yii\base\Exception $e) {
             $this->code(500, $e->getMessage());
         }
@@ -151,6 +152,11 @@ class ApiController extends Controller
         }catch (yii\base\Exception $e){
             echo $e->getMessage();
         }
+    }
+
+    public function actionUploadImg()
+    {
+
     }
 
     protected function code($status = 200, $message = '', $data = [])
