@@ -4,6 +4,7 @@ namespace app\modules\v1\controllers;
 
 use common\models\Nick;
 use common\models\NickList;
+use common\models\Portrait;
 use common\models\SmsRegisterBinding;
 use common\models\User;
 use common\models\UserNickBinding;
@@ -154,9 +155,46 @@ class ApiController extends Controller
         }
     }
 
-    public function actionUploadImg()
+    public function actionUploadPortrait($user_id)
     {
+        $fileName = md5(time() . uniqid());
+        $filePath = sprintf('%s/resources/upload/%s.jpg', yii::$app->basePath, $fileName);
 
+        //获取文件流并保存
+        $upload = new yii\web\UploadedFile();
+        $instance = $upload->getInstanceByName('portrait');
+        if(null == $instance) {
+            $this->code(450, '未收到图片流');
+        }
+        $is = $instance->saveAs($filePath, true);
+        if(!$is) {
+            $this->code(480, '图片上传失败');
+        }
+
+        //图片同步七牛
+        $is = yii::$app->qiniu->upload($filePath, $fileName);
+        if(!$is) {
+            $this->code(480, '同步图片服务器失败');
+        }
+
+        //图片入库
+        $portrait = new Portrait();
+        $is = $portrait->add([
+            'user_id' => $user_id,
+            'portrait_name' => $fileName,
+            'created_at' => time(),
+        ]);
+        if(!$is) {
+            $this->code(480, '图片入库失败');
+        }
+
+        //删除临时文件
+        $is = unlink($filePath);
+        if(!$is) {
+            $this->code(480, '临时文件删除失败');
+        }
+
+        $this->code(200, 'ok', ['url' => yii::$app->qiniu->getDomain() . '/' . $fileName]);
     }
 
     protected function code($status = 200, $message = '', $data = [])

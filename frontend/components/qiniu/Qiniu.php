@@ -17,6 +17,7 @@ class Qiniu extends yii\base\Component
     public $accessKey;
     public $secretKey;
     public $bucket;
+    public $domain;
 
     /**
      * 上传文件
@@ -38,4 +39,8 @@ class Qiniu extends yii\base\Component
         return true;
     }
 
+    public function getDomain()
+    {
+        return $this->domain;
+    }
 }
