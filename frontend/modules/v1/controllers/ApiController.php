@@ -194,7 +194,7 @@ class ApiController extends Controller
 
             //图片同步七牛
             $qiniuObj = yii::$app->qiniu;
-            $is = $qiniuObj->upload($filePath, null, ['callbackUrl' => $qiniuObj->getCallbackUrl(), 'callbackBody' => "key=$fileName", 'saveKey' => $fileName]);
+            $is = $qiniuObj->upload($filePath, null, ['callbackUrl' => $qiniuObj->getCallbackUrl(), 'callbackBody' => "key=$fileName&user_id=1", 'saveKey' => $fileName]);
             if(!$is) throw new Exception(yii::$app->qiniu->getError());
 
             //图片入库
@@ -229,7 +229,7 @@ class ApiController extends Controller
 
             //生成token
             $qiniuObj = yii::$app->qiniu;
-            $token = $qiniuObj->generateToken(['callbackUrl' => $qiniuObj->getCallbackUrl(), 'callbackBody' => "key=$fileName", 'saveKey' => $fileName]);
+            $token = $qiniuObj->generateToken(['callbackUrl' => $qiniuObj->getCallbackUrl(), 'callbackBody' => "key=$fileName&user_id=$user_id", 'saveKey' => $fileName]);
             if(!$token) throw new Exception('token 获取失败');
 
             $this->code(200, 'ok', ['token' => $token]);
