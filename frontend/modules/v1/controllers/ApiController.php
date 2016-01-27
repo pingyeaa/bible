@@ -18,6 +18,14 @@ class ApiController extends Controller
         parent::beforeAction($action);
 
         //验证签名
+        //在Module中声明不进行基本验证的也不需签名
+        $except = $this->module->getBehavior('authenticator')->except;
+        $route = sprintf('%s/%s', yii::$app->controller->id, $this->action->id);
+        if(in_array($route, $except)){
+            return true;
+        }
+
+        //指定ip不需签名
         if(in_array(yii::$app->request->getUserIP(), yii::$app->params['WithoutVerifyIP'])){
             return true;
         }
