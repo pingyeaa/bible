@@ -265,7 +265,7 @@ class ApiController extends Controller
             $is = $portrait->add([
                'user_id' => $user_id,
                'portrait_name' => $key,
-               'create_at' => time(),
+               'created_at' => time(),
             ]);
             if(!$is) throw new Exception(var_export($portrait->getErrors(), true));
 
