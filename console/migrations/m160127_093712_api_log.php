@@ -9,7 +9,7 @@ class m160127_093712_api_log extends Migration
     {
         $this->createTable('public.api_log', [
             'id' => $this->primaryKey(),
-            'route' => $this->string(20)->notNull(),
+            'route' => $this->string(30)->notNull(),
             'request_type' => $this->string(10)->notNull(), //请求类型
             'url' => $this->text(),
             'params' => $this->text(),
