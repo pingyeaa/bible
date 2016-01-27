@@ -127,6 +127,7 @@ class ApiController extends Controller
             $this->code(200, 'ok', [
                 'user_id' => $userId,
                 'nation_code' => $nation_code,
+                'avatar' => '',
                 'phone' => $phone,
                 'nickname' => '',
                 'nick_id' => $nickInfo['nick_id'],
@@ -249,9 +250,7 @@ class ApiController extends Controller
         try{
             //验证是否为七牛回调
             $contentType = $_SERVER['HTTP_CONTENT_TYPE'];
-//            $contentType = 'application/x-www-form-urlencoded';
             $authorization = $_SERVER['HTTP_AUTHORIZATION'];
-//            $authorization = 'QBox Oh6_85X0DdugnNszjQSpH27dn8Sp-CPBWFilnzYc:sRYk_1ZQM-CWrWtkHMaggiIUTSY=';
             $url = yii::$app->qiniu->getCallbackUrl();
             $body = http_build_query($_POST);
             $is = yii::$app->qiniu->verifyCallback($contentType, $authorization, $url, $body);
