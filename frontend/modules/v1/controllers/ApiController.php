@@ -186,7 +186,7 @@ class ApiController extends Controller
 
             //图片同步七牛
             $qiniuObj = yii::$app->qiniu;
-            $is = $qiniuObj->upload($filePath, null, ['callbackUrl' => $qiniuObj->getCallbackUrl, 'callbackBody' => "key=$fileName", 'saveKey' => $fileName]);
+            $is = $qiniuObj->upload($filePath, null, ['callbackUrl' => $qiniuObj->getCallbackUrl(), 'callbackBody' => "key=$fileName", 'saveKey' => $fileName]);
             if(!$is) throw new Exception(yii::$app->qiniu->getError());
 
             //图片入库
