@@ -221,7 +221,7 @@ class ApiController extends Controller
 
             //生成token
             $qiniuObj = yii::$app->qiniu;
-            $token = $qiniuObj->generateToken(['callbackUrl' => $qiniuObj->getCallbackUrl, 'callbackBody' => "key=$fileName", 'saveKey' => $fileName]);
+            $token = $qiniuObj->generateToken(['callbackUrl' => $qiniuObj->getCallbackUrl(), 'callbackBody' => "key=$fileName", 'saveKey' => $fileName]);
             if(!$token) throw new Exception('token 获取失败');
 
             $this->code(200, 'ok', ['token' => $token]);
