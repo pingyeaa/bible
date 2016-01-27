@@ -45,6 +45,12 @@ class Qiniu extends yii\base\Component
         return $this->domain;
     }
 
+    public function generateToken()
+    {
+        $auth = new Auth($this->accessKey, $this->secretKey);
+        return $auth->uploadToken($this->bucket);
+    }
+
     protected function addError($message)
     {
         $this->message = $message;

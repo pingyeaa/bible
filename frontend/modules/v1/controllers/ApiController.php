@@ -2,15 +2,14 @@
 
 namespace app\modules\v1\controllers;
 
-use common\models\Nick;
+use yii;
 use common\models\NickList;
 use common\models\Portrait;
 use common\models\SmsRegisterBinding;
 use common\models\User;
 use common\models\UserNickBinding;
-use common\models\Users;
-use yii;
 use yii\web\Controller;
+use yii\base\Exception;
 
 class ApiController extends Controller
 {
@@ -38,8 +37,15 @@ class ApiController extends Controller
         return true;
     }
 
-    public function actionUserLogin()
+    public function actionUserLogin($username)
     {
+        try{
+            if(123 == $username) throw new yii\base\Exception('用户名为空');
+
+
+        }catch (yii\base\Exception $e){
+            echo $e->getMessage();
+        }
 //        yii::$app->qiniu->upload('/home/enoch/图片/test.png', time());
 //        $nick = new NickList();
 //        $nick->generate(130);exit;
@@ -74,8 +80,7 @@ class ApiController extends Controller
 
             //同步账号到腾讯云
             $result = yii::$app->tencent->accountImport(sprintf('%s-%s', $nation_code, $phone));
-            if(0 != $result['ErrorCode'])
-                $this->code(453, '腾讯云同步错误');
+            if(0 != $result['ErrorCode']) throw new Exception('腾讯云同步错误');
 
             //开启事务
             $trans = yii::$app->db->beginTransaction();
@@ -90,7 +95,7 @@ class ApiController extends Controller
             ]);
             if(!$userId) {
                 $trans->rollBack();
-                $this->code(453, '用户入库失败');
+                throw new Exception('用户入库失败');
             }
 
             //选择用户标识入库
@@ -98,7 +103,7 @@ class ApiController extends Controller
             $nickInfo = $nickListObj->getInfoByOrderNo($userId);
             if(!$nickInfo){
                 $trans->rollBack();
-                $this->code(453, '未找到用户标识');
+                throw new Exception('未找到用户标识');
             }
             $userNickObj = new UserNickBinding();
             $result = $userNickObj->add([
@@ -108,11 +113,11 @@ class ApiController extends Controller
             ]);
             if(!$result) {
                 $trans->rollBack();
-                $this->code(453, 'nick_id入库失败');
+                throw new Exception('nick_id入库失败');
             }
             $trans->commit();
             $this->code(200, 'ok', ['user_id' => $userId]);
-        }catch (yii\base\Exception $e) {
+        }catch (Exception $e) {
             $this->code(500, $e->getMessage());
         }
     }
@@ -131,8 +136,7 @@ class ApiController extends Controller
             //发短信
             $code = rand(100000, 999999);
             $resultArray = yii::$app->tencent->sendSMS($phone, sprintf('【活石APP】%s为您的登录验证码，请于30分钟内填写。如非本人操作，请忽略本短信。', $code), "86");
-            if($resultArray['result'] != 0)
-                $this->code(451, '短信发送失败');
+            if($resultArray['result'] != 0) throw new Exception('短信发送失败');
 
             //记录短信
             $smsBinding = new SmsRegisterBinding();
@@ -143,55 +147,82 @@ class ApiController extends Controller
                 'status' => 1,
                 'create_at' => time(),
             ]);
-            if(!$result)
-                $this->code(452, '其他错误');
+            if(!$result) throw new Exception('smsRegisterBinding save error');
 
             $this->code(200, 'OK');
+
         }catch (yii\base\Exception $e){
-            echo $e->getMessage();
+            $this->code(500, $e->getMessage());
         }
     }
 
-    public function actionUploadPortrait($user_id)
+//    /**
+//     * 上传用户头像
+//     * @param int $user_id 用户id
+//     */
+//    public function actionUploadPortrait($user_id)
+//    {
+//        try {
+//            $fileName = md5(time() . uniqid());
+//            $filePath = sprintf('%s/resources/upload/%s.jpg', yii::$app->basePath, $fileName);
+//
+//            //获取文件流并保存
+//            $upload = new yii\web\UploadedFile();
+//            $instance = $upload->getInstanceByName('portrait');
+//            if(null == $instance) {
+//                $this->code(450, '未收到图片流');
+//            }
+//            $is = $instance->saveAs($filePath, true);
+//            if(!$is) throw new Exception('图片上传失败');
+//
+//            //图片同步七牛
+//            $is = yii::$app->qiniu->upload($filePath, $fileName);
+//            if(!$is) throw new Exception(yii::$app->qiniu->getError());
+//
+//            //图片入库
+//            $portrait = new Portrait();
+//            $is = $portrait->add([
+//                'user_id' => $user_id,
+//                'portrait_name' => $fileName,
+//                'created_at' => time(),
+//            ]);
+//            if(!$is) throw new Exception('图片入库失败');
+//
+//            //删除临时文件
+//            $is = unlink($filePath);
+//            if(!$is) throw new Exception('临时文件删除失败');
+//
+//            $this->code(200, 'ok', ['url' => yii::$app->qiniu->getDomain() . '/' . $fileName]);
+//
+//        }catch (Exception $e) {
+//            $this->code(500, $e->getMessage());
+//        }
+//    }
+
+    /**
+     * 获取七牛上传凭证
+     * @param int $user_id
+     */
+    public function actionQiniuToken($user_id)
     {
-        $fileName = md5(time() . uniqid());
-        $filePath = sprintf('%s/resources/upload/%s.jpg', yii::$app->basePath, $fileName);
+        try {
+            $token = yii::$app->qiniu->generateToken();
+            if(!$token) throw new Exception('token 获取失败');
 
-        //获取文件流并保存
-        $upload = new yii\web\UploadedFile();
-        $instance = $upload->getInstanceByName('portrait');
-        if(null == $instance) {
-            $this->code(450, '未收到图片流');
-        }
-        $is = $instance->saveAs($filePath, true);
-        if(!$is) {
-            $this->code(480, '图片上传失败');
-        }
+            $this->code(200, 'ok', ['token' => $token]);
 
-        //图片同步七牛
-        $is = yii::$app->qiniu->upload($filePath, $fileName);
-        if(!$is) {
-            $this->code(480, '同步图片服务器失败：' . yii::$app->qiniu->getError());
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
         }
+    }
 
-        //图片入库
-        $portrait = new Portrait();
-        $is = $portrait->add([
-            'user_id' => $user_id,
-            'portrait_name' => $fileName,
-            'created_at' => time(),
-        ]);
-        if(!$is) {
-            $this->code(480, '图片入库失败');
+    public function actionUserData($user_id, $nick_name, $gender, $birthday, $believe_date)
+    {
+        try{
+            
+        }catch (yii\base\Exception $e) {
+            $this->code(500, $e->getMessage());
         }
-
-        //删除临时文件
-        $is = unlink($filePath);
-        if(!$is) {
-            $this->code(480, '临时文件删除失败');
-        }
-
-        $this->code(200, 'ok', ['url' => yii::$app->qiniu->getDomain() . '/' . $fileName]);
     }
 
     protected function code($status = 200, $message = '', $data = [])
@@ -202,7 +233,7 @@ class ApiController extends Controller
             $response->data = $data;
         }else {
             $response->data = [
-                'message' => $message,
+                $message,
             ];
         }
         yii::$app->end(0, $response);
