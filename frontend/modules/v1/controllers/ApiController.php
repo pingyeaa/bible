@@ -2,6 +2,7 @@
 
 namespace app\modules\v1\controllers;
 
+use common\models\ApiLog;
 use yii;
 use common\models\NickList;
 use common\models\Portrait;
@@ -13,9 +14,16 @@ use yii\base\Exception;
 
 class ApiController extends Controller
 {
+    protected $startMemory;
+    protected $startTime;
+
     public function beforeAction($action)
     {
         parent::beforeAction($action);
+
+        //初始化内存、时间，用于计算内存消耗
+        $this->startMemory = memory_get_usage();
+        $this->startTime = microtime(true);
 
         //验证签名
         //在Module中声明不进行基本验证的也不需签名
@@ -52,7 +60,7 @@ class ApiController extends Controller
 
 
         }catch (yii\base\Exception $e){
-            echo $e->getMessage();
+            $this->code(500, $e->getMessage());
         }
 //        yii::$app->qiniu->upload('/home/enoch/图片/test.png', time());
 //        $nick = new NickList();
@@ -267,6 +275,9 @@ class ApiController extends Controller
                'created_at' => time(),
             ]);
             if(!$is) throw new Exception(var_export($portrait->getErrors(), true));
+            $this->code(200, 'ok', [
+                'avatar' => sprintf('%s/%s', yii::$app->qiniu->getDomain(), $key),
+            ]);
 
         }catch (Exception $e) {
             yii::info($e->getMessage(), 'qiniu-callback');
@@ -294,6 +305,24 @@ class ApiController extends Controller
                 $message,
             ];
         }
+        $this->log($response);
         yii::$app->end(0, $response);
+    }
+
+    protected function log($response)
+    {
+        $log = new ApiLog();
+        $log->add([
+            'route' => $this->route,
+            'request_type' => yii::$app->request->method,
+            'url' => yii::$app->request->absoluteUrl,
+            'params' => http_build_query($_REQUEST),
+            'status' => $response->statusCode,
+            'response' => json_encode($response->data, JSON_UNESCAPED_UNICODE),
+            'ip' => yii::$app->request->getUserIP(),
+            'created_at' => time(),
+            'memory' => (memory_get_usage() - $this->startMemory) / 1000,
+            'response_time' => sprintf('%.2f', (microtime(true) - $this->startTime)),
+        ]);
     }
 }
