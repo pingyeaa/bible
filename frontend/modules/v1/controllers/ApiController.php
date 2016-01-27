@@ -169,26 +169,27 @@ class ApiController extends Controller
      * 上传用户头像
      * @param int $user_id 用户id
      */
-//    public function actionUploadPortrait($user_id)
-//    {
-//        try {
-//            $fileName = md5(time() . uniqid());
-//            $filePath = sprintf('%s/resources/upload/%s.jpg', yii::$app->basePath, $fileName);
-//
-//            //获取文件流并保存
-//            $upload = new yii\web\UploadedFile();
-//            $instance = $upload->getInstanceByName('portrait');
-//            if(null == $instance) {
-//                $this->code(450, '未收到图片流');
-//            }
-//            $is = $instance->saveAs($filePath, true);
-//            if(!$is) throw new Exception('图片上传失败');
-//
-//            //图片同步七牛
-//            $is = yii::$app->qiniu->upload($filePath, $fileName);
-//            if(!$is) throw new Exception(yii::$app->qiniu->getError());
-//
-//            //图片入库
+    public function actionUploadPortrait($user_id)
+    {
+        try {
+            $fileName = md5(time() . uniqid());
+            $filePath = sprintf('%s/resources/upload/%s.jpg', yii::$app->basePath, $fileName);
+
+            //获取文件流并保存
+            $upload = new yii\web\UploadedFile();
+            $instance = $upload->getInstanceByName('portrait');
+            if(null == $instance) {
+                $this->code(450, '未收到图片流');
+            }
+            $is = $instance->saveAs($filePath, true);
+            if(!$is) throw new Exception('图片上传失败');
+
+            //图片同步七牛
+            $qiniuObj = yii::$app->qiniu;
+            $is = $qiniuObj->upload($filePath, null, ['callbackUrl' => $qiniuObj->getCallbackUrl, 'callbackBody' => "key=$fileName", 'saveKey' => $fileName]);
+            if(!$is) throw new Exception(yii::$app->qiniu->getError());
+
+            //图片入库
 //            $portrait = new Portrait();
 //            $is = $portrait->add([
 //                'user_id' => $user_id,
@@ -196,17 +197,17 @@ class ApiController extends Controller
 //                'created_at' => time(),
 //            ]);
 //            if(!$is) throw new Exception('图片入库失败');
-//
-//            //删除临时文件
-//            $is = unlink($filePath);
-//            if(!$is) throw new Exception('临时文件删除失败');
-//
-//            $this->code(200, 'ok', ['url' => yii::$app->qiniu->getDomain() . '/' . $fileName]);
-//
-//        }catch (Exception $e) {
-//            $this->code(500, $e->getMessage());
-//        }
-//    }
+
+            //删除临时文件
+            $is = unlink($filePath);
+            if(!$is) throw new Exception('临时文件删除失败');
+
+            $this->code(200, 'ok', ['url' => yii::$app->qiniu->getDomain() . '/' . $fileName]);
+
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
 
     /**
      * 获取七牛上传凭证

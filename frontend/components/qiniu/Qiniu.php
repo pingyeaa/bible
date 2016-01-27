@@ -26,14 +26,15 @@ class Qiniu extends yii\base\Component
      * 上传文件
      * @param string $filePath 本地文件路径
      * @param string $key 保存到七牛的文件名称
+     * @param null $policy
+     * @throws \Exception
      * @return bool
      */
-    public function upload($filePath, $key)
+    public function upload($filePath, $key, $policy = null)
     {
-        $auth = new Auth($this->accessKey, $this->secretKey);
-        $token = $auth->uploadToken($this->bucket);
+        $token = $this->generateToken($policy);
         $uploadMgr = new UploadManager();
-        list($ret, $err) = $uploadMgr->putFile($token, null, $filePath);
+        list($ret, $err) = $uploadMgr->putFile($token, $key, $filePath);
         if ($err !== null) {
             $this->addError(json_encode($err));
             return false;
