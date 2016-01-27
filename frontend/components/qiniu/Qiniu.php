@@ -30,7 +30,8 @@ class Qiniu extends yii\base\Component
     public function upload($filePath, $key)
     {
         $auth = new Auth($this->accessKey, $this->secretKey);
-        $token = $auth->uploadToken($this->bucket, null, 3600, ['callbackUrl' => 'http://119.29.108.48/bible/frontend/web/index.php/v1/callback/qiniu', 'callbackBody' => json_encode(['user_id' => 1])]);
+        $file = md5(time().uniqid());
+        $token = $auth->uploadToken($this->bucket, null, 3600, ['callbackUrl' => 'http://119.29.108.48/bible/frontend/web/index.php/v1/callback/qiniu', 'callbackBody' => "key=$file", 'saveKey' => $file]);
         $uploadMgr = new UploadManager();
         list($ret, $err) = $uploadMgr->putFile($token, $key, $filePath);
         if ($err !== null) {
