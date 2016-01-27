@@ -16,6 +16,7 @@ class Module extends \yii\base\Module
                 'authenticator' => [
                     'class' => HttpBasicAuth::className(),
                     'auth' => 'common\models\User::findByPasswordResetToken',
+                    'except' => ['callback/qiniu']
                 ]
             ]
         );
