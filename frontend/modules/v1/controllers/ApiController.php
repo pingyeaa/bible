@@ -267,7 +267,7 @@ class ApiController extends Controller
                'portrait_name' => $key,
                'create_at' => time(),
             ]);
-            if(!$is) throw new Exception('入库失败');
+            if(!$is) throw new Exception(var_export($portrait->getErrors(), true));
 
         }catch (Exception $e) {
             yii::info($e->getMessage(), 'qiniu-callback');
