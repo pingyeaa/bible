@@ -18,6 +18,7 @@ class Qiniu extends yii\base\Component
     public $secretKey;
     public $bucket;
     public $domain;
+    public $callbackUrl;
 
     protected $message;
 
@@ -30,8 +31,7 @@ class Qiniu extends yii\base\Component
     public function upload($filePath, $key)
     {
         $auth = new Auth($this->accessKey, $this->secretKey);
-        $file = md5(time().uniqid());
-        $token = $auth->uploadToken($this->bucket, null, 3600, ['callbackUrl' => 'http://119.29.108.48/bible/frontend/web/index.php/v1/callback/qiniu', 'callbackBody' => "key=$file", 'saveKey' => $file]);
+        $token = $auth->uploadToken($this->bucket);
         $uploadMgr = new UploadManager();
         list($ret, $err) = $uploadMgr->putFile($token, null, $filePath);
         if ($err !== null) {
@@ -52,6 +52,20 @@ class Qiniu extends yii\base\Component
         return $auth->uploadToken($this->bucket, null, 3600, $policy);
     }
 
+    /**
+     * 检测请求是否为七牛的回调
+     * @param $contentType
+     * @param $originAuthorization
+     * @param $url
+     * @param $body
+     * @return bool
+     */
+    public function verifyCallback($contentType, $originAuthorization, $url, $body)
+    {
+        $auth = new Auth($this->accessKey, $this->secretKey);
+        return $auth->verifyCallback($contentType, $originAuthorization, $url, $body);
+    }
+
     protected function addError($message)
     {
         $this->message = $message;
@@ -61,5 +75,10 @@ class Qiniu extends yii\base\Component
     public function getError()
     {
         return $this->message;
+    }
+
+    public function getCallbackUrl()
+    {
+        return $this->callbackUrl;
     }
 }

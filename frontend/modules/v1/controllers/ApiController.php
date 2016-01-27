@@ -219,12 +219,47 @@ class ApiController extends Controller
             $fileName = md5(time() . uniqid());
 
             //生成token
-            $token = yii::$app->qiniu->generateToken(['callbackUrl' => 'http://119.29.108.48/bible/frontend/web/index.php/v1/callback/qiniu', 'callbackBody' => "key=$fileName", 'saveKey' => $fileName]);
+            $qiniuObj = yii::$app->qiniu;
+            $token = $qiniuObj->generateToken(['callbackUrl' => $qiniuObj->getCallbackUrl, 'callbackBody' => "key=$fileName", 'saveKey' => $fileName]);
             if(!$token) throw new Exception('token 获取失败');
 
             $this->code(200, 'ok', ['token' => $token]);
 
         }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 七牛头像上传回调
+     * @param $user_id
+     * @param string $key 文件名称
+     */
+    public function actionQiniuCallback($user_id, $key)
+    {
+        try{
+            //验证是否为七牛回调
+            $contentType = $_SERVER['HTTP_CONTENT_TYPE'];
+            $authorization = $_SERVER['HTTP_AUTHORIZATION'];
+            $url = yii::$app->qiniu->getCallbackUrl();
+            $body = http_build_url($_POST);
+            $is = yii::$app->qiniu->verifyCallback($contentType, $authorization, $url, $body);
+            if(!$is) {
+                yii::info('请求不合法', 'qiniu-callback');
+                $this->code(450, '请求不合法');
+            }
+
+            //图片入库
+            $portrait = new Portrait();
+            $is = $portrait->add([
+               'user_id' => $user_id,
+               'portrait_name' => $key,
+               'create_at' => time(),
+            ]);
+            if(!$is) throw new Exception('入库失败');
+
+        }catch (Exception $e) {
+            yii::info($e->getMessage(), 'qiniu-callback');
             $this->code(500, $e->getMessage());
         }
     }
