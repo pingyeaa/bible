@@ -116,7 +116,16 @@ class ApiController extends Controller
                 throw new Exception('nick_id入库失败');
             }
             $trans->commit();
-            $this->code(200, 'ok', ['user_id' => $userId]);
+            $this->code(200, 'ok', [
+                'user_id' => $userId,
+                'nation_code' => $nation_code,
+                'phone' => $phone,
+                'nickname' => '',
+                'nick_id' => $nickInfo['nick_id'],
+                'gender' => 0,
+                'birthday' => '',
+                'believe_date' => '',
+            ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
         }
