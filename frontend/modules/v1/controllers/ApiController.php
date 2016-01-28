@@ -300,14 +300,17 @@ class ApiController extends Controller
     public function actionUserData($user_id, $nick_name, $gender, $birthday, $believe_date)
     {
         try{
+            if(!strtotime($believe_date) || !strtotime($birthday)) {
+                $this->code(450, '日期格式不正确');
+            }
             if(1 != $gender && 0 != $gender) {
-                $this->code(450, '`gender`错误');
+                $this->code(451, '`gender`错误');
             }
 
             //检查是否未注册
             $userInfo = User::findIdentity($user_id);
             if(!$userInfo) {
-                $this->code(451, '账号未注册');
+                $this->code(452, '账号未注册');
             }
 
             //修改信息
