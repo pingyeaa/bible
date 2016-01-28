@@ -91,6 +91,8 @@ class ApiController extends Controller
                 'gender' => (int)$userInfo['gender'],
                 'birthday' => $userInfo['birthday'],
                 'believe_date' => $userInfo['believe_date'],
+                'province_id' => 0,
+                'city_id' => 0,
             ]);
 
         }catch (yii\base\Exception $e){
@@ -168,6 +170,8 @@ class ApiController extends Controller
                 'gender' => 0,
                 'birthday' => '',
                 'believe_date' => '',
+                'province_id' => 0,
+                'city_id' => 0,
             ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
@@ -318,8 +322,10 @@ class ApiController extends Controller
      * @param $gender
      * @param $birthday
      * @param $believe_date
+     * @param $province_id
+     * @param $city_id
      */
-    public function actionUserData($user_id, $nick_name, $gender, $birthday, $believe_date)
+    public function actionUserData($user_id, $nick_name, $gender, $birthday, $believe_date, $province_id = 0, $city_id = 0)
     {
         try{
             if(!strtotime($believe_date) || !strtotime($birthday)) {
@@ -342,6 +348,8 @@ class ApiController extends Controller
                 'birthday' => $birthday,
                 'believe_date' => $believe_date,
                 'updated_at' => time(),
+                'province_id' => $province_id,
+                'city_id' => $city_id,
             ], $userInfo['id']);
             if(!$is) throw new Exception('用户资料修改失败');
 
@@ -365,6 +373,8 @@ class ApiController extends Controller
                 'gender' => (int)$gender,
                 'birthday' => date('Y-m-d', strtotime($birthday)),
                 'believe_date' => date('Y-m-d', strtotime($believe_date)),
+                'province_id' => $province_id,
+                'city_id' => $city_id,
             ]);
 
         }catch (yii\base\Exception $e) {
