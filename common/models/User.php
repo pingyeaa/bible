@@ -50,7 +50,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findIdentity($id)
     {
-        return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
+        return static::findOne(['id' => $id]);
     }
 
     /**
@@ -211,5 +211,16 @@ class User extends ActiveRecord implements IdentityInterface
     public function isExists($nationCode, $phone)
     {
         return $this->find()->where('nation_code = :nation_code and username = :phone', ['nation_code' => $nationCode, 'phone' => $phone])->one();
+    }
+
+    /**
+     * 修改资料
+     * @param $attributes
+     * @param $userId
+     * @return int
+     */
+    public static function mod($attributes, $userId)
+    {
+        return self::updateAll($attributes, 'id = :id', ['id' => $userId]);
     }
 }

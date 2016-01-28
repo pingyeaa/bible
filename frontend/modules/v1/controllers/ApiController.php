@@ -27,7 +27,11 @@ class ApiController extends Controller
 
         //验证签名
         //在Module中声明不进行基本验证的也不需签名
-        $except = $this->module->getBehavior('authenticator')->except;
+        $behavior = $this->module->getBehavior('authenticator');
+        if(!isset($behavior->except)) {
+            return true;
+        }
+        $except = $behavior->except;
         $route = sprintf('%s/%s', yii::$app->controller->id, $this->action->id);
         if(in_array($route, $except)){
             return true;
@@ -285,10 +289,59 @@ class ApiController extends Controller
         }
     }
 
+    /**
+     * 完善用户资料
+     * @param $user_id
+     * @param $nick_name
+     * @param $gender
+     * @param $birthday
+     * @param $believe_date
+     */
     public function actionUserData($user_id, $nick_name, $gender, $birthday, $believe_date)
     {
         try{
-            
+            if(1 != $gender && 0 != $gender) {
+                $this->code(450, '`gender`错误');
+            }
+
+            //检查是否未注册
+            $userInfo = User::findIdentity($user_id);
+            if(!$userInfo) {
+                $this->code(451, '账号未注册');
+            }
+
+            //修改信息
+            $is = User::mod([
+                'nickname' => $nick_name,
+                'gender' => $gender,
+                'birthday' => $birthday,
+                'believe_date' => $believe_date,
+                'updated_at' => time(),
+            ], $userInfo['id']);
+            if(!$is) throw new Exception('用户资料修改失败');
+
+            //返回用户信息
+            //获取头像
+            $portraitInfo = Portrait::findByUserId($user_id);
+            $avatar = $portraitInfo ? yii::$app->qiniu->getDomain() . '/' . $portraitInfo['portrait_name'] : '';
+
+            //获取用户标识
+            $nickInfo = UserNickBinding::findNickInfoByUserId($user_id);
+            if(!$nickInfo) throw new Exception('未找到用户标识');
+
+            //返回用户数据
+            $this->code(200, 'ok', [
+                'user_id' => $user_id,
+                'nation_code' => $userInfo['nation_code'],
+                'avatar' => $avatar,
+                'phone' => $userInfo['username'],
+                'nickname' => $nick_name,
+                'nick_id' => $nickInfo['nickList']['nick_id'],
+                'gender' => (int)$gender,
+                'birthday' => date('Y-m-d', strtotime($birthday)),
+                'believe_date' => date('Y-m-d', strtotime($believe_date)),
+            ]);
+
         }catch (yii\base\Exception $e) {
             $this->code(500, $e->getMessage());
         }

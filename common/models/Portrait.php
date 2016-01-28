@@ -24,4 +24,9 @@ class Portrait extends ActiveRecord
         $this->attributes = $data;
         return $this->save();
     }
+
+    public static function findByUserId($userId)
+    {
+        return self::find()->where(['user_id' => $userId])->orderBy('id desc')->one();
+    }
 }

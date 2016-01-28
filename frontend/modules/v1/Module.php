@@ -2,6 +2,7 @@
 
 namespace app\modules\v1;
 
+use yii;
 use yii\filters\auth\HttpBasicAuth;
 use yii\helpers\ArrayHelper;
 
@@ -11,6 +12,10 @@ class Module extends \yii\base\Module
 
     public function behaviors()
     {
+        //指定ip不需签名
+        if(in_array(yii::$app->request->getUserIP(), yii::$app->params['WithoutVerifyIP'])){
+            return parent::behaviors();
+        }
         return ArrayHelper::merge(
             parent::behaviors(),[
                 'authenticator' => [
