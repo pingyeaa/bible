@@ -57,23 +57,45 @@ class ApiController extends Controller
         return true;
     }
 
-    public function actionUserLogin($username)
+    /**
+     * 用户登录
+     * @param int $nation_code
+     * @param $phone
+     * @param $password
+     */
+    public function actionUserLogin($nation_code = 86, $phone, $password)
     {
         try{
-            if(123 == $username) throw new yii\base\Exception('用户名为空');
+            $userInfo = User::findByPhoneAndPassword($nation_code, $phone, $password);
+            if(!$userInfo) {
+                $this->code(450, '账号或密码错误');
+            }
 
+            //返回用户信息
+            //获取头像
+            $portraitInfo = Portrait::findByUserId($userInfo['id']);
+            $avatar = $portraitInfo ? yii::$app->qiniu->getDomain() . '/' . $portraitInfo['portrait_name'] : '';
+
+            //获取用户标识
+            $nickInfo = UserNickBinding::findNickInfoByUserId($userInfo['id']);
+            if(!$nickInfo) throw new Exception('未找到用户标识');
+
+            //返回用户数据
+            $this->code(200, 'ok', [
+                'user_id' => $userInfo['id'],
+                'nation_code' => $userInfo['nation_code'],
+                'avatar' => $avatar,
+                'phone' => $userInfo['username'],
+                'nickname' => $userInfo['nickname'],
+                'nick_id' => $nickInfo['nickList']['nick_id'],
+                'gender' => (int)$userInfo['gender'],
+                'birthday' => $userInfo['birthday'],
+                'believe_date' => $userInfo['believe_date'],
+            ]);
 
         }catch (yii\base\Exception $e){
             $this->code(500, $e->getMessage());
         }
-//        yii::$app->qiniu->upload('/home/enoch/图片/test.png', time());
-//        $nick = new NickList();
-//        $nick->generate(130);exit;
-//        $result = yii::$app->tencent->registerAccount(sprintf('%s-%s', $nation_code, $phone), $password);
-//        echo 1;exit;
-//        $this->code(200, null, ['user_id' => 99, 'sex' => 0]);
-//        $this->code(450, '手机号码不正确', ['user_id' => 99, 'sex' => 0]);
-        return true;
     }
 
     /**
@@ -190,45 +212,45 @@ class ApiController extends Controller
      * 上传用户头像
      * @param int $user_id 用户id
      */
-    public function actionUploadPortrait($user_id)
-    {
-        try {
-            $fileName = md5(time() . uniqid());
-            $filePath = sprintf('%s/resources/upload/%s.jpg', yii::$app->basePath, $fileName);
-
-            //获取文件流并保存
-            $upload = new yii\web\UploadedFile();
-            $instance = $upload->getInstanceByName('portrait');
-            if(null == $instance) {
-                $this->code(450, '未收到图片流');
-            }
-            $is = $instance->saveAs($filePath, true);
-            if(!$is) throw new Exception('图片上传失败');
-
-            //图片同步七牛
-            $qiniuObj = yii::$app->qiniu;
-            $is = $qiniuObj->upload($filePath, null, ['callbackUrl' => $qiniuObj->getCallbackUrl(), 'callbackBody' => "key=$fileName&user_id=1", 'saveKey' => $fileName]);
-            if(!$is) throw new Exception(yii::$app->qiniu->getError());
-
-            //图片入库
-//            $portrait = new Portrait();
-//            $is = $portrait->add([
-//                'user_id' => $user_id,
-//                'portrait_name' => $fileName,
-//                'created_at' => time(),
-//            ]);
-//            if(!$is) throw new Exception('图片入库失败');
-
-            //删除临时文件
-            $is = unlink($filePath);
-            if(!$is) throw new Exception('临时文件删除失败');
-
-            $this->code(200, 'ok', ['url' => yii::$app->qiniu->getDomain() . '/' . $fileName]);
-
-        }catch (Exception $e) {
-            $this->code(500, $e->getMessage());
-        }
-    }
+//    public function actionUploadPortrait($user_id)
+//    {
+//        try {
+//            $fileName = md5(time() . uniqid());
+//            $filePath = sprintf('%s/resources/upload/%s.jpg', yii::$app->basePath, $fileName);
+//
+//            //获取文件流并保存
+//            $upload = new yii\web\UploadedFile();
+//            $instance = $upload->getInstanceByName('portrait');
+//            if(null == $instance) {
+//                $this->code(450, '未收到图片流');
+//            }
+//            $is = $instance->saveAs($filePath, true);
+//            if(!$is) throw new Exception('图片上传失败');
+//
+//            //图片同步七牛
+//            $qiniuObj = yii::$app->qiniu;
+//            $is = $qiniuObj->upload($filePath, null, ['callbackUrl' => $qiniuObj->getCallbackUrl(), 'callbackBody' => "key=$fileName&user_id=1", 'saveKey' => $fileName]);
+//            if(!$is) throw new Exception(yii::$app->qiniu->getError());
+//
+//            //图片入库
+////            $portrait = new Portrait();
+////            $is = $portrait->add([
+////                'user_id' => $user_id,
+////                'portrait_name' => $fileName,
+////                'created_at' => time(),
+////            ]);
+////            if(!$is) throw new Exception('图片入库失败');
+//
+//            //删除临时文件
+//            $is = unlink($filePath);
+//            if(!$is) throw new Exception('临时文件删除失败');
+//
+//            $this->code(200, 'ok', ['url' => yii::$app->qiniu->getDomain() . '/' . $fileName]);
+//
+//        }catch (Exception $e) {
+//            $this->code(500, $e->getMessage());
+//        }
+//    }
 
     /**
      * 获取七牛上传凭证

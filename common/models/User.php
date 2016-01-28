@@ -223,4 +223,16 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return self::updateAll($attributes, 'id = :id', ['id' => $userId]);
     }
+
+    /**
+     * 根据国家码、电话、密码查询用户信息
+     * @param $nationCode
+     * @param $phone
+     * @param $password
+     * @return null|static
+     */
+    public static function findByPhoneAndPassword($nationCode, $phone, $password)
+    {
+        return self::findOne(['nation_code' => $nationCode, 'username' => $phone, 'password' => $password]);
+    }
 }
