@@ -91,8 +91,8 @@ class ApiController extends Controller
                 'gender' => (int)$userInfo['gender'],
                 'birthday' => $userInfo['birthday'],
                 'believe_date' => $userInfo['believe_date'],
-                'province_id' => 0,
-                'city_id' => 0,
+                'province_id' => $userInfo['province_id'],
+                'city_id' => $userInfo['city_id'],
             ]);
 
         }catch (yii\base\Exception $e){
