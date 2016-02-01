@@ -386,12 +386,11 @@ class ApiController extends Controller
     {
         $response = yii::$app->getResponse();
         $response->setStatusCode($status);
+        $data = $this->format($data);
         if(200 == $status) {
             $response->data = $data;
         }else {
-            $response->data = [
-                $message,
-            ];
+            $response->content = $message;
         }
         $this->log($response);
         yii::$app->end(0, $response);
@@ -412,5 +411,20 @@ class ApiController extends Controller
             'memory' => (memory_get_usage() - $this->startMemory) / 1000,
             'response_time' => sprintf('%.2f', (microtime(true) - $this->startTime)),
         ]);
+    }
+
+    protected function format($data)
+    {
+        $newData = [];
+        foreach($data as $k => $v) {
+            if(is_array($v)) {
+                $newData[$k] = $this->format($v);
+            }elseif($v === null) {
+                $newData[$k] = '';
+            }else {
+                $newData[$k] = $v;
+            }
+        }
+        return $newData;
     }
 }
