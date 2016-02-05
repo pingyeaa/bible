@@ -3,6 +3,7 @@
 namespace app\modules\v1\controllers;
 
 use common\models\ApiLog;
+use common\models\ReadingTime;
 use yii;
 use common\models\NickList;
 use common\models\Portrait;
@@ -378,6 +379,47 @@ class ApiController extends Controller
             ]);
 
         }catch (yii\base\Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 阅读时间
+     * @param $user_id
+     * @param $minutes
+     * @param $days
+     */
+    public function actionReadingTime($user_id, $minutes, $days)
+    {
+        try {
+            if($minutes < 0 || $days < 0) {
+                $this->code(450, '时间必须是正整数');
+            }
+
+            //空的就新增，已存在则修改
+            $info = ReadingTime::findByUserId($user_id);
+            if($info) {
+                $oldMinutes = $info['minutes'];
+                $is = ReadingTime::mod([
+                    'minutes' => (int)$minutes + $oldMinutes,
+                    'days' => (int)$days,
+                    'updated_at' => time()
+                ], $user_id);
+                if(!$is) throw new Exception('阅读统计修改失败');
+            }else {
+                $readingTime = new ReadingTime();
+                $is = $readingTime->add([
+                    'user_id' => $user_id,
+                    'minutes' => $minutes,
+                    'days' => $days,
+                    'created_at' => time(),
+                    'updated_at' => time(),
+                ]);
+                if(!$is) throw new Exception('阅读统计保存失败');
+            }
+            $this->code(200);
+
+        }catch (Exception $e) {
             $this->code(500, $e->getMessage());
         }
     }
