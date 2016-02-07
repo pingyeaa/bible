@@ -3,7 +3,10 @@
 namespace app\modules\v1\controllers;
 
 use common\models\ApiLog;
+use common\models\Friends;
+use common\models\Intercession;
 use common\models\ReadingTime;
+use React\Promise\FunctionRaceTest;
 use yii;
 use common\models\NickList;
 use common\models\Portrait;
@@ -417,6 +420,102 @@ class ApiController extends Controller
                 ]);
                 if(!$is) throw new Exception('阅读统计保存失败');
             }
+            $this->code(200);
+
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 同步联系人
+     * @param $user_id
+     * @param $phones
+     */
+    public function actionContacts($user_id, $phones)
+    {
+        try {
+            $phoneArray = explode(',', $phones);
+            if(!$phoneArray) {
+                $this->code(450, '联系人号码为空');
+            }
+            $phoneArray = array_filter(array_unique($phoneArray));
+            if(!$phoneArray) {
+                $this->code(450, '联系人号码为空');
+            }
+
+            $data = [];
+            foreach($phoneArray as $phone) {
+                //未注册
+                $userInfo = User::findByUsernameAndNationCode($phone, 86);
+                if(!$userInfo) {
+                    $data[] = [
+                        'nation_code' => '86',
+                        'phone' => $phone,
+                        'type' => 1,
+                    ];
+                    continue;
+                }
+                if($userInfo['id'] == $user_id) {
+                    continue;
+                }
+
+                //已注册则添加为好友
+                $friendInfo = Friends::findByFriendIdAndUserId($userInfo['id'], $user_id);
+                if(!$friendInfo) {
+                    $friends = new Friends();
+                    $is = $friends->add([
+                        'user_id' => $user_id,
+                        'friend_user_id' => $userInfo['id'],
+                        'created_at' => time(),
+                        'updated_at' => time(),
+                    ]);
+                    if(!$is) throw new Exception('好友添加失败');
+                }
+
+                $data[] = [
+                    'nation_code' => '86',
+                    'phone' => $phone,
+                    'type' => 2
+                ];
+            }
+            $this->code(200, 'ok', $data);
+
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 发布代祷
+     * @param $user_id
+     * @param $content
+     * @param $privacy
+     */
+    public function actionIntercession($user_id, $content, $privacy)
+    {
+        try {
+            if(empty($content)) {
+                $this->code(450, '代祷内容不能为空');
+            }
+            if($privacy != 1 && $privacy != 0) {
+                $this->code(451, '参数格式不正确');
+            }
+
+            //入库
+            $intercession = new Intercession();
+            $is = $intercession->add([
+                'user_id' => $user_id,
+                'content' => $content,
+                'privacy' => (int)$privacy,
+                'created_at' => time(),
+                'updated_at' => time(),
+                'ip' => yii::$app->request->getUserIP(),
+                'comments' => 0,
+                'intercessions' => 0,
+            ]);
+            if(!$is) throw new Exception('入库失败');
+
             $this->code(200);
 
         }catch (Exception $e) {
