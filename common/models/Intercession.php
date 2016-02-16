@@ -40,4 +40,9 @@ class Intercession extends ActiveRecord
     {
         return self::updateAll($data, 'user_id = :user_id', ['user_id' => $userId]);
     }
+
+    public static function findAllByFriendsId($friendsId)
+    {
+        return self::find()->where('user_id in (:friendsId)', ['friendsId' => $friendsId])->all();
+    }
 }

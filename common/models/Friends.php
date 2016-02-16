@@ -78,4 +78,12 @@ class Friends extends ActiveRecord
         return self::find()->where(['friend_user_id' => $friendId, 'user_id' => $userId])->one();
     }
 
+    /**
+     * @param $friendIdArray
+     * @return $this|static
+     */
+    public static function findAllByFriendIds($friendIdArray)
+    {
+        return self::find()->where('user_id in (:user_id)', ['user_id' => implode(',', $friendIdArray)]);
+    }
 }

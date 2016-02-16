@@ -15,6 +15,7 @@ use common\models\User;
 use common\models\UserNickBinding;
 use yii\web\Controller;
 use yii\base\Exception;
+use yii\helpers\ArrayHelper;
 
 class ApiController extends Controller
 {
@@ -97,6 +98,8 @@ class ApiController extends Controller
                 'believe_date' => $userInfo['believe_date'],
                 'province_id' => $userInfo['province_id'],
                 'city_id' => $userInfo['city_id'],
+                'province_name' => '',
+                'city_name' => '',
             ]);
 
         }catch (yii\base\Exception $e){
@@ -176,6 +179,8 @@ class ApiController extends Controller
                 'believe_date' => '',
                 'province_id' => 0,
                 'city_id' => 0,
+                'province_name' => '',
+                'city_name' => '',
             ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
@@ -326,10 +331,12 @@ class ApiController extends Controller
      * @param $gender
      * @param $birthday
      * @param $believe_date
-     * @param $province_id
-     * @param $city_id
+     * @param int $province_id
+     * @param int $city_id
+     * @param string $province_name
+     * @param string $city_name
      */
-    public function actionUserData($user_id, $nick_name, $gender, $birthday, $believe_date, $province_id = 0, $city_id = 0)
+    public function actionUserData($user_id, $nick_name, $gender, $birthday, $believe_date, $province_id = 0, $city_id = 0, $province_name = '', $city_name = '')
     {
         try{
             if(!strtotime($believe_date) || !strtotime($birthday)) {
@@ -379,6 +386,8 @@ class ApiController extends Controller
                 'believe_date' => date('Y-m-d', strtotime($believe_date)),
                 'province_id' => $province_id,
                 'city_id' => $city_id,
+                'province_name' => $province_name,
+                'city_name' => $city_name,
             ]);
 
         }catch (yii\base\Exception $e) {
@@ -517,6 +526,30 @@ class ApiController extends Controller
             if(!$is) throw new Exception('入库失败');
 
             $this->code(200);
+
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 代祷列表
+     * @param $user_id
+     */
+    public function actionIntercessionList($user_id)
+    {
+        try {
+            //获取朋友列表
+            $friendList = Friends::findAllByUserId($user_id);
+            $friendIdArray = ArrayHelper::getColumn($friendList, 'friend_user_id');
+            $friendIds = implode(',', $friendIdArray);
+
+            //一维代祷
+            $list1 = Intercession::findAllByFriendsId($friendIds);
+
+            //二维代祷
+            //获取二维朋友id
+
 
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
