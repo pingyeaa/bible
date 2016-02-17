@@ -51,6 +51,9 @@ class ApiController extends Controller
             $this->code(412, '签名错误');
         unset($_REQUEST['sign']);
         $secretKey = yii::$app->params['Authorization']['sign']['secret_key'];
+        foreach($_REQUEST as $k => $v) {
+            $_REQUEST[$k] = urldecode($v);
+        }
         if(!yii::$app->sign->validate($_REQUEST, $sign, $secretKey))
             $this->code(412, '签名错误');
 
