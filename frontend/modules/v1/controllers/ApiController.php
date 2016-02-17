@@ -55,7 +55,7 @@ class ApiController extends Controller
             $_REQUEST[$k] = urldecode($v);
         }
         if(!yii::$app->sign->validate($_REQUEST, $sign, $secretKey))
-            $this->code(412, '签名错误');
+            $this->code(412, '签名错误', ['sign' => $sign]);
 
         //验证时间戳
         $timestamp = isset($_REQUEST['timestamp']) ? $_REQUEST['timestamp'] : null;

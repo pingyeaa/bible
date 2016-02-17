@@ -21,8 +21,13 @@ class Sign extends Component
     {
         ksort($params);
         $url = http_build_query($params) . ':' . $secretKey;
-        if(sha1($url) !== $sign)
+        if(sha1($url) !== $sign) {
+            yii::info(var_export($params) ,'sign');
+            yii::info('url: ' . $url ,'sign');
+            yii::info(sprintf("origin_sign: %s \n new_sign: %s", sha1($url), $url) ,'sign');
             return false;
+        }
+
         return true;
     }
 }
