@@ -21,7 +21,7 @@ class Sign extends Component
     public function validate($params, $sign, $secretKey)
     {
         ksort($params);
-        $url = urldecode(http_build_query($params)) . ':' . $secretKey;
+        $url = urldecode(http_build_query($params) . ':' . $secretKey);
         if(sha1($url) !== $sign) {
             yii::info(var_export($params) ,'sign');
             yii::info('url: ' . $url ,'sign');
