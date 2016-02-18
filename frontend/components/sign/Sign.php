@@ -6,6 +6,7 @@
  * Time: 下午2:35
  */
 namespace frontend\components\sign;
+use yii;
 use yii\base\Component;
 
 class Sign extends Component
