@@ -398,38 +398,57 @@ class ApiController extends Controller
     /**
      * 阅读时间
      * @param $user_id
-     * @param $minutes
-     * @param $days
+     * @param $last_minutes 上次阅读分钟数
+     * @param $continuous_days 连续天数
+     * @param $total_minutes 总阅读天数
+     * @param $is_add true-覆盖数据库 false-不覆盖数据库
      */
-    public function actionReadingTime($user_id, $minutes, $days)
+    public function actionReadingTime($user_id, $last_minutes, $continuous_days, $total_minutes, $is_add)
     {
         try {
-            if($minutes < 0 || $days < 0) {
+            if($last_minutes < 0 || $continuous_days < 0) {
                 $this->code(450, '时间必须是正整数');
             }
 
             //空的就新增，已存在则修改
             $info = ReadingTime::findByUserId($user_id);
             if($info) {
-                $oldMinutes = $info['minutes'];
+
+                //不覆盖就直接返回原数据
+                if('false' === $is_add) {
+                    $this->code(200, 'ok', [
+                        'continuous_days' => $info['continuous_days'],
+                        'last_minutes' => $info['last_minutes'],
+                        'total_minutes' => $info['total_minutes'],
+                    ]);
+                }
+
+                //覆盖原数据
                 $is = ReadingTime::mod([
-                    'minutes' => (int)$minutes + $oldMinutes,
-                    'days' => (int)$days,
+                    'total_minutes' => (int)$total_minutes,
+                    'continuous_days' => (int)$continuous_days,
+                    'last_minutes' => (int)$last_minutes,
                     'updated_at' => time()
                 ], $user_id);
                 if(!$is) throw new Exception('阅读统计修改失败');
+
             }else {
                 $readingTime = new ReadingTime();
                 $is = $readingTime->add([
                     'user_id' => $user_id,
-                    'minutes' => $minutes,
-                    'days' => $days,
+                    'total_minutes' => (int)$total_minutes,
+                    'continuous_days' => (int)$continuous_days,
+                    'last_minutes' => (int)$last_minutes,
                     'created_at' => time(),
                     'updated_at' => time(),
                 ]);
                 if(!$is) throw new Exception('阅读统计保存失败');
             }
-            $this->code(200);
+            $this->code(200, 'ok', [
+                'continuous_days' => $continuous_days,
+                'last_minutes' => $last_minutes,
+                'total_minutes' => $total_minutes,
+            ]);
 
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
