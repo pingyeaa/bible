@@ -6,6 +6,7 @@ use common\models\ApiLog;
 use common\models\Friends;
 use common\models\Intercession;
 use common\models\ReadingTime;
+use common\models\ShareToday;
 use React\Promise\FunctionRaceTest;
 use yii;
 use common\models\NickList;
@@ -570,6 +571,27 @@ class ApiController extends Controller
             //获取二维朋友id
 
 
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 活石`tab`页面内容
+     * @param $user_id
+     */
+    public function actionHuoshiTab($user_id)
+    {
+        try{
+            $newInfo = ShareToday::findNewInfo();
+            if(!$newInfo) {
+                return $this->code(450, '没有分享内容');
+            }
+            return $this->code(200, '', [
+                'continuous_interces_days' => 0,    //连续代祷天数
+                'share_number' => $newInfo['share_number'],
+                'share_today' => $newInfo['share_content'],
+            ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
         }
