@@ -99,8 +99,8 @@ class ApiController extends Controller
                 'believe_date' => $userInfo['believe_date'],
                 'province_id' => $userInfo['province_id'],
                 'city_id' => $userInfo['city_id'],
-                'province_name' => '',
-                'city_name' => '',
+                'province_name' => $userInfo['province_name'],
+                'city_name' => $userInfo['city_name'],
             ]);
 
         }catch (yii\base\Exception $e){
@@ -362,6 +362,8 @@ class ApiController extends Controller
                 'updated_at' => time(),
                 'province_id' => $province_id,
                 'city_id' => $city_id,
+                'province_name' => $province_name,
+                'city_name' => $city_name,
             ], $userInfo['id']);
             if(!$is) throw new Exception('用户资料修改失败');
 
