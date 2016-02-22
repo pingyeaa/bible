@@ -585,9 +585,9 @@ class ApiController extends Controller
         try{
             $newInfo = ShareToday::findNewInfo();
             if(!$newInfo) {
-                return $this->code(450, '没有分享内容');
+                $this->code(450, '没有分享内容');
             }
-            return $this->code(200, '', [
+            $this->code(200, '', [
                 'continuous_interces_days' => 0,    //连续代祷天数
                 'share_number' => $newInfo['share_number'],
                 'share_today' => $newInfo['share_content'],
