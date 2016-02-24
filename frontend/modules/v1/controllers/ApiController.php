@@ -86,6 +86,9 @@ class ApiController extends Controller
             $nickInfo = UserNickBinding::findNickInfoByUserId($userInfo['id']);
             if(!$nickInfo) throw new Exception('未找到用户标识');
 
+            //获取阅读时间
+            $readInfo = ReadingTime::findByUserId($userInfo['id']);
+
             //返回用户数据
             $this->code(200, 'ok', [
                 'user_id' => $userInfo['id'],
@@ -101,6 +104,8 @@ class ApiController extends Controller
                 'city_id' => $userInfo['city_id'],
                 'province_name' => $userInfo['province_name'],
                 'city_name' => $userInfo['city_name'],
+                'continuous_interces_days' => 0,    //连续代祷天数
+                'continuous_days' => $readInfo ? $readInfo['continuous_days'] : 0,    //连续阅读天数
             ]);
 
         }catch (yii\base\Exception $e){
