@@ -456,6 +456,7 @@ class ApiController extends Controller
                 'continuous_days' => $continuous_days,
                 'last_minutes' => $last_minutes,
                 'total_minutes' => $total_minutes,
+                'notice' => '',
             ]);
 
         }catch (Exception $e) {
@@ -466,55 +467,62 @@ class ApiController extends Controller
     /**
      * 同步联系人
      * @param $user_id
-     * @param $phones
+     * @param $contacts
+     * @internal param $phones
      */
-    public function actionContacts($user_id, $phones)
+    public function actionContacts($user_id, $contacts)
     {
         try {
-            $phoneArray = explode(',', $phones);
-            if(!$phoneArray) {
-                $this->code(450, '联系人号码为空');
-            }
-            $phoneArray = array_filter(array_unique($phoneArray));
-            if(!$phoneArray) {
-                $this->code(450, '联系人号码为空');
+            $contactsArray = json_decode($contacts);
+            if(!$contactsArray || !is_array($contactsArray)) {
+                $this->code(450, '参数格式错误');
             }
 
+            //区分用户类型：已注册、未注册
             $data = [];
-            foreach($phoneArray as $phone) {
-                //未注册
-                $userInfo = User::findByUsernameAndNationCode($phone, 86);
-                if(!$userInfo) {
-                    $data[] = [
-                        'nation_code' => '86',
-                        'phone' => $phone,
-                        'type' => 1,
-                    ];
+            foreach($contactsArray as $obj) {
+
+                $phoneArray = explode(',', $obj->phones);
+                if(!$phoneArray)
                     continue;
-                }
-                if($userInfo['id'] == $user_id) {
-                    continue;
+                $phoneArray = array_filter(array_unique($phoneArray));
+                $isFriend = 0;
+                foreach($phoneArray as $phone) {
+
+                    //未注册则跳过
+                    $userInfo = User::findByUsernameAndNationCode($phone, 86);
+                    if(isset($userInfo['id']) && $userInfo['id'] == $user_id) {
+                        continue;
+                    }
+
+                    //已注册则添加为好友
+                    if(0 != $userInfo['id']) {
+                        $isFriend = 1;
+
+                        //如果还不是好友则添加
+                        $friendInfo = Friends::findByFriendIdAndUserId($userInfo['id'], $user_id);
+                        if(!$friendInfo) {
+                            $friends = new Friends();
+                            $is = $friends->add([
+                                'user_id' => $user_id,
+                                'friend_user_id' => $userInfo['id'],
+                                'created_at' => time(),
+                                'updated_at' => time(),
+                            ]);
+                            if(!$is) throw new Exception('好友添加失败');
+                        }
+                    }
                 }
 
-                //已注册则添加为好友
-                $friendInfo = Friends::findByFriendIdAndUserId($userInfo['id'], $user_id);
-                if(!$friendInfo) {
-                    $friends = new Friends();
-                    $is = $friends->add([
-                        'user_id' => $user_id,
-                        'friend_user_id' => $userInfo['id'],
-                        'created_at' => time(),
-                        'updated_at' => time(),
-                    ]);
-                    if(!$is) throw new Exception('好友添加失败');
-                }
-
+                //构造返回数据
                 $data[] = [
-                    'nation_code' => '86',
-                    'phone' => $phone,
-                    'type' => 2
+                    'contacts_id' => $obj->contacts_id,
+                    'contacts_name' => $obj->contacts_name,
+                    'phones' => $obj->phones,
+                    'contacts_type' => $isFriend ? 1 : 2,
                 ];
             }
+
             $this->code(200, 'ok', $data);
 
         }catch (Exception $e) {
