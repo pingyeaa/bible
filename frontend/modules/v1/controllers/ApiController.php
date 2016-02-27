@@ -418,6 +418,8 @@ class ApiController extends Controller
                 $this->code(450, '时间必须是正整数');
             }
 
+            $notice = '您真是一个虔诚的教徒，希望您再接再厉';
+
             //空的就新增，已存在则修改
             $info = ReadingTime::findByUserId($user_id);
             if($info) {
@@ -428,6 +430,7 @@ class ApiController extends Controller
                         'continuous_days' => $info['continuous_days'],
                         'last_minutes' => $info['last_minutes'],
                         'total_minutes' => $info['total_minutes'],
+                        'notice' => $notice,
                     ]);
                 }
 
@@ -456,7 +459,7 @@ class ApiController extends Controller
                 'continuous_days' => $continuous_days,
                 'last_minutes' => $last_minutes,
                 'total_minutes' => $total_minutes,
-                'notice' => '您真是一个虔诚的教徒，希望您再接再厉', 
+                'notice' => $notice,
             ]);
 
         }catch (Exception $e) {
