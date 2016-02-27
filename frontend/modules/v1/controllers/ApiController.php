@@ -456,7 +456,7 @@ class ApiController extends Controller
                 'continuous_days' => $continuous_days,
                 'last_minutes' => $last_minutes,
                 'total_minutes' => $total_minutes,
-                'notice' => '',
+                'notice' => '您真是一个虔诚的教徒，希望您再接再厉',
             ]);
 
         }catch (Exception $e) {
