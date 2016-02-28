@@ -97,8 +97,11 @@ class User extends ActiveRecord implements IdentityInterface
         $username_o = yii::$app->params['Authorization']['username'];
         $password_o = yii::$app->params['Authorization']['password'];
 
-        if($username !== $username_o || $password_o !== $password)
+        if($username !== $username_o || $password_o !== $password) {
+            yii::info(sprintf('Authorization-username: %s, password: %s', $username_o, $password_o), 'basic-auth');
             return null;
+        }
+
         return new User();
     }
 

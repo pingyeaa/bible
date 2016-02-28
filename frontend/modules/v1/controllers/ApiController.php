@@ -492,6 +492,9 @@ class ApiController extends Controller
                 $isFriend = 0;
                 foreach($phoneArray as $phone) {
 
+                    //清除空格
+                    $phone = trim($phone);
+
                     //未注册则跳过
                     $userInfo = User::findByUsernameAndNationCode($phone, 86);
                     if(isset($userInfo['id']) && $userInfo['id'] == $user_id) {
