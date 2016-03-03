@@ -540,9 +540,11 @@ class ApiController extends Controller
      * 发布代祷
      * @param $user_id
      * @param $content
-     * @param $privacy
+     * @param $privacy 是否私有 0-否 1-是
+     * @param null $updated_at 预计更新时间，时间戳
+     * @param $position 定位位置
      */
-    public function actionIntercession($user_id, $content, $privacy)
+    public function actionIntercession($user_id, $content, $privacy, $updated_at = null, $position)
     {
         try {
             if(empty($content)) {
@@ -559,7 +561,7 @@ class ApiController extends Controller
                 'content' => $content,
                 'privacy' => (int)$privacy,
                 'created_at' => time(),
-                'updated_at' => time(),
+                'updated_at' => $updated_at,
                 'ip' => yii::$app->request->getUserIP(),
                 'comments' => 0,
                 'intercessions' => 0,
