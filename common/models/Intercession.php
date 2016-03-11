@@ -14,7 +14,8 @@ class Intercession extends ActiveRecord
     public function rules()
     {
         return [
-            [['privacy', 'user_id', 'content', 'ip', 'comments', 'intercessions', 'created_at', 'updated_at'], 'required']
+            [['privacy', 'user_id', 'content', 'ip', 'comments', 'intercessions', 'created_at', 'position'], 'required'],
+            [['updated_at'], 'safe']
         ];
     }
 

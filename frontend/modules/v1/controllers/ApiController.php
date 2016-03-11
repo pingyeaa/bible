@@ -566,8 +566,9 @@ class ApiController extends Controller
                 'ip' => yii::$app->request->getUserIP(),
                 'comments' => 0,
                 'intercessions' => 0,
+                'position' => $position,
             ]);
-            if(!$is) throw new Exception('入库失败');
+            if(!$is) throw new Exception(json_encode($intercession->getErrors()));
 
             $this->code(200);
 
