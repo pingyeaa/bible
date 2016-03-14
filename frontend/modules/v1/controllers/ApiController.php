@@ -630,11 +630,14 @@ class ApiController extends Controller
                     }
                 }
 
+                //获取最新头像
+                $portraitInfo = Portrait::findByUserId($v['user_id']);
+
                 //构造返回数据
                 $data[] = [
                     'content' => $v['content'],
                     'intercession_number' => 0,
-                    'portrait' => empty($v['portrait_name']) ? '' : yii::$app->qiniu->getDomain() . '/' .$v['portrait_name'],
+                    'portrait' => !$portraitInfo ? '' : yii::$app->qiniu->getDomain() . '/' .$portraitInfo['portrait_name'],
                     'nick_name' => $v['nickname'],
                     'time' => $v['created_at'],
                     'relationship' => $relationship,
