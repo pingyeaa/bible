@@ -50,6 +50,7 @@ class Intercession extends ActiveRecord
             left join public.portrait c on a.id = c.user_id
             where a.id in (".$friendsId.") order by b.id desc
         ";
+        echo $sql;exit;
         return self::getDb()->createCommand($sql)->queryAll();
     }
 }
