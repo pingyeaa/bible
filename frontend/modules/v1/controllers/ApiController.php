@@ -584,17 +584,64 @@ class ApiController extends Controller
     public function actionIntercessionList($user_id)
     {
         try {
-            //获取朋友列表
-            $friendList = Friends::findAllByUserId($user_id);
-            $friendIdArray = ArrayHelper::getColumn($friendList, 'friend_user_id');
-            $friendIds = implode(',', $friendIdArray);
+            //查询三维内的好友id
+            $allIdArray = Friends::findFriendsByUserIdAndDepth($user_id, 3);
 
-            //一维代祷
-            $list1 = Intercession::findAllByFriendsId($friendIds);
+            //处理数组
+            $handleArray = [];
+            foreach($allIdArray as $v) {
+                $handleArray[$v['depth']][] = $v['friend_user_id'];
+            }
+            $userIdArray = $newArray = [];
+            foreach($handleArray as $k => $handleIdArray) {
+                $handleIdArray = array_unique($handleIdArray);
+                if(1 != $k) {
+                    foreach($handleIdArray as $handleKey => $handleValue) {
+                        $handleArray[1] = isset($handleArray[1]) ? $handleArray[1] : [];
+                        $handleArray[2] = isset($handleArray[2]) ? $handleArray[2] : [];
+                        if(2 == $k && (in_array($handleValue, $handleArray[1]) || $handleValue == $user_id)) {
+                            unset($handleIdArray[$handleKey]);
+                        }
+                        if(3 == $k && (in_array($handleValue, $handleArray[1]) || in_array($handleValue, $handleArray[2]) || $handleValue == $user_id)) {
+                            unset($handleIdArray[$handleKey]);
+                        }
+                    }
+                }
+                $newArray[$k] = $handleIdArray;
+                $userIdArray = array_merge($userIdArray, $handleIdArray);
+            }
 
-            //二维代祷
-            //获取二维朋友id
+            //获取代祷内容列表
+            $userIdArray = array_merge($userIdArray, [$user_id]);
+            $intercessionList = Intercession::findAllByFriendsId(implode(',', $userIdArray));
 
+            //分类数据
+            $data = [];
+            foreach($intercessionList as $v) {
+
+                //根据用户id查询关系
+                $relationship = 0;
+                foreach($newArray as $kUser => $vUser) {
+                    if($user_id == $v['user_id']) {
+                        $relationship = 0;
+                    }
+                    if(in_array($v['user_id'], $vUser)) {
+                        $relationship = $kUser;
+                    }
+                }
+
+                //构造返回数据
+                $data[] = [
+                    'content' => $v['content'],
+                    'intercession_number' => 0,
+                    'portrait' => empty($v['portrait_name']) ? '' : yii::$app->qiniu->getDomain() . '/' .$v['portrait_name'],
+                    'nick_name' => $v['nickname'],
+                    'time' => $v['created_at'],
+                    'relationship' => $relationship,
+                    'position' => $v['position'],
+                ];
+            }
+            $this->code(200, 'ok', $data);
 
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());

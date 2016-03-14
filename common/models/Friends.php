@@ -3,6 +3,7 @@
 namespace common\models;
 
 use yii\db\ActiveRecord;
+use yii;
 
 class Friends extends ActiveRecord
 {
@@ -85,5 +86,24 @@ class Friends extends ActiveRecord
     public static function findAllByFriendIds($friendIdArray)
     {
         return self::find()->where('user_id in (:user_id)', ['user_id' => implode(',', $friendIdArray)]);
+    }
+
+    /**
+     * 根据用户查找几维内的好友id
+     * @param $userId
+     * @param $depth
+     * @return array
+     */
+    public static function findFriendsByUserIdAndDepth($userId, $depth)
+    {
+        $sql = "
+            with recursive re as (
+                select b.user_id,b.friend_user_id,1 as depth from public.friends b where b.user_id = %d
+                union all
+                select c.user_id,c.friend_user_id,d.depth+1 as depth from public.friends c inner join re d on c.user_id = d.friend_user_id where d.depth < %d
+            )select user_id,friend_user_id,depth from re;
+        ";
+        $sql = sprintf($sql, $userId, $depth);
+        return self::getDb()->createCommand($sql)->queryAll();
     }
 }

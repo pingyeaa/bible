@@ -44,6 +44,12 @@ class Intercession extends ActiveRecord
 
     public static function findAllByFriendsId($friendsId)
     {
-        return self::find()->where('user_id in (:friendsId)', ['friendsId' => $friendsId])->all();
+        $sql = "
+            select * from public.user a
+            inner join public.intercession b on a.id = b.user_id
+            left join public.portrait c on a.id = c.user_id
+            where a.id in (".$friendsId.") order by b.id desc
+        ";
+        return self::getDb()->createCommand($sql)->queryAll();
     }
 }
