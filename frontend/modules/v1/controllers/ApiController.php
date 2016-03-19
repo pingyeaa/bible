@@ -683,7 +683,7 @@ class ApiController extends Controller
             //查询好友数量
             $friendsArray = Friends::findAllByUserId($user_id);
             $permission = 1;
-            if(!$friendsArray && 3 > count($friendsArray)) {
+            if(!$friendsArray || 3 > count($friendsArray)) {
                 $permission = 0;
             }
 
