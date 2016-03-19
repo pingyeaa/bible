@@ -672,6 +672,28 @@ class ApiController extends Controller
         }
     }
 
+    /**
+     * 检测是否有权限访问代祷页面
+     * 目前判定标准是通讯录好友数量大于等于`3`人则可以访问
+     * @param $user_id
+     */
+    public function actionPermission($user_id)
+    {
+        try{
+            //查询好友数量
+            $friendsArray = Friends::findAllByUserId($user_id);
+            $permission = 1;
+            if(!$friendsArray && 3 > count($friendsArray)) {
+                $permission = 0;
+            }
+
+            //返回
+            $this->code(200, 'ok', ['permission' => $permission]);
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
     protected function code($status = 200, $message = '', $data = [])
     {
         $response = yii::$app->getResponse();
