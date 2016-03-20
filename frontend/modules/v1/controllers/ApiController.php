@@ -637,7 +637,7 @@ class ApiController extends Controller
                 $data[] = [
                     'content' => $v['content'],
                     'intercession_number' => 0,
-                    'portrait' => !$portraitInfo ? '' : yii::$app->qiniu->getDomain() . '/' .$portraitInfo['portrait_name'],
+                    'avatar' => !$portraitInfo ? '' : yii::$app->qiniu->getDomain() . '/' .$portraitInfo['portrait_name'],
                     'nick_name' => $v['nickname'],
                     'time' => $v['created_at'],
                     'relationship' => $relationship,
