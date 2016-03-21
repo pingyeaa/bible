@@ -238,4 +238,19 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return self::findOne(['nation_code' => $nationCode, 'username' => $phone, 'password' => $password]);
     }
+
+    /**
+     * @param $userId
+     * @return yii\db\DataReader
+     */
+    public static function getUserInfoAndAvastar($userId)
+    {
+        $sql = "
+            select * from public.user a
+            left join public.portrait b on a.id = b.user_id
+            where a.id = %d
+        ";
+        $sql = sprintf($sql, $userId);
+        return self::getDb()->createCommand($sql)->queryOne();
+    }
 }

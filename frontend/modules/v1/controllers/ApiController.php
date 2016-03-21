@@ -5,6 +5,7 @@ namespace app\modules\v1\controllers;
 use common\models\ApiLog;
 use common\models\Friends;
 use common\models\Intercession;
+use common\models\IntercessionComments;
 use common\models\ReadingTime;
 use common\models\ShareToday;
 use React\Promise\FunctionRaceTest;
@@ -689,6 +690,38 @@ class ApiController extends Controller
 
             //返回
             $this->code(200, 'ok', ['permission' => $permission]);
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 获取评论
+     * @param $user_id
+     * @param $intercession_id
+     */
+    public function actionIntercessionComments($user_id, $intercession_id)
+    {
+        try{
+            $list = IntercessionComments::getAllByIntercessionId($intercession_id);
+            $data = [];
+            if($list) {
+                foreach($list as $info) {
+
+                    //获取用户资料
+                    $commentUserInfo = User::getUserInfoAndAvastar($info['comment_by_id']);
+                    $data[] = [
+                        'user_id' => $info['comment_by_id'],
+                        'content' => $info['content'],
+                        'avatar' => !empty($commentUserInfo['portrait_name']) ? yii::$app->qiniu->getDomain() . '/' . $commentUserInfo['portrait_name'] : '',
+                        'nick_name' => $commentUserInfo['nickname'],
+                        'praise_number' => $info['praise_number'],
+                        'created_at' => $info['created_at'],
+                    ];
+                }
+            }
+
+            $this->code(200, 'ok', $data);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
         }
