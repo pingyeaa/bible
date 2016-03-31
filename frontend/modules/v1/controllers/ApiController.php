@@ -689,7 +689,10 @@ class ApiController extends Controller
             }
 
             //返回
-            $this->code(200, 'ok', ['permission' => $permission]);
+            $this->code(200, 'ok', [
+                'permission' => $permission,
+                'is_synced' => 1,
+            ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
         }
