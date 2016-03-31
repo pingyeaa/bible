@@ -563,7 +563,7 @@ class ApiController extends Controller
                 'content' => $content,
                 'privacy' => (int)$privacy,
                 'created_at' => time(),
-                'updated_at' => $updated_at,
+                'updated_at' => $updated_at/1000,
                 'ip' => yii::$app->request->getUserIP(),
                 'comments' => 0,
                 'intercessions' => 0,
