@@ -730,6 +730,21 @@ class ApiController extends Controller
         }
     }
 
+    /**
+     * 分享统计
+     * @param $user_id
+     */
+    public function actionShareRecording($user_id)
+    {
+        try {
+            $this->code(200, '', [
+                'total_times' => 20,
+            ]);
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
     protected function code($status = 200, $message = '', $data = [])
     {
         $response = yii::$app->getResponse();
