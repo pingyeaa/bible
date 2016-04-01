@@ -91,6 +91,9 @@ class ApiController extends Controller
             //获取阅读时间
             $readInfo = ReadingTime::findByUserId($userInfo['id']);
 
+            //获取分享统计次数
+            $shareInfo = AppShare::findByUserId($userInfo['id']);
+
             //返回用户数据
             $this->code(200, 'ok', [
                 'user_id' => $userInfo['id'],
@@ -109,7 +112,7 @@ class ApiController extends Controller
                 'continuous_interces_days' => 0,    //连续代祷天数
                 'continuous_days' => $readInfo ? $readInfo['continuous_days'] : 0,    //连续阅读天数
                 'total_minutes' => $readInfo ? $readInfo['total_minutes'] : 0,    //总阅读分钟数
-                'total_share_times' => 10,    //分享统计次数
+                'total_share_times' => isset($shareInfo['share_times']) ? $shareInfo['share_times'] : 0,    //分享统计次数
             ]);
 
         }catch (yii\base\Exception $e){
