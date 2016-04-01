@@ -3,6 +3,7 @@
 namespace app\modules\v1\controllers;
 
 use common\models\ApiLog;
+use common\models\AppShare;
 use common\models\Friends;
 use common\models\Intercession;
 use common\models\IntercessionComments;
@@ -738,8 +739,26 @@ class ApiController extends Controller
     public function actionShareRecording($user_id)
     {
         try {
+            //获取分享次数
+            $appShare = new AppShare();
+            $info = AppShare::findByUserId($user_id);
+
+            if(!$info) {
+                $appShare->add([
+                    'user_id' => $user_id,
+                    'share_times' => 1,
+                    'created_at' => time(),
+                    'updated_at' => time(),
+                ]);
+            }else {
+                //累加分享次数
+                $appShare = new AppShare();
+                $appShare->accumulation($user_id);
+            }
+
+            //返回
             $this->code(200, '', [
-                'total_times' => 20,
+                'total_share_times' => isset($info['share_times']) ? intval($info['share_times']) + 1 : 0,
             ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
