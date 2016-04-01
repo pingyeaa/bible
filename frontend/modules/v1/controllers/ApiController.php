@@ -108,6 +108,7 @@ class ApiController extends Controller
                 'continuous_interces_days' => 0,    //连续代祷天数
                 'continuous_days' => $readInfo ? $readInfo['continuous_days'] : 0,    //连续阅读天数
                 'total_minutes' => $readInfo ? $readInfo['total_minutes'] : 0,    //总阅读分钟数
+                'total_share_times' => 10,    //分享统计次数
             ]);
 
         }catch (yii\base\Exception $e){
