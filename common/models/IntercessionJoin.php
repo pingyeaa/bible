@@ -29,4 +29,14 @@ class IntercessionJoin extends ActiveRecord
     {
         return self::find()->where(['intercession_id' => $intercessionId])->orderBy('praise_number desc')->all();
     }
+
+    /**
+     * @param $intercessionId
+     * @param $intercessorsId
+     * @return $this|static
+     */
+    public static function findByIntercessionIdAndIntercessorsId($intercessionId, $intercessorsId)
+    {
+        return self::find()->where(['intercession_id' => $intercessionId, 'intercessors_id' => $intercessorsId])->one();
+    }
 }

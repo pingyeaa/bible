@@ -60,4 +60,20 @@ class Intercession extends ActiveRecord
     {
         return self::findOne(['id' => $id]);
     }
+
+    /**
+     * 递增代祷表`加入代祷`数量
+     * @param $intercessionId
+     * @return bool
+     * @throws Exception
+     */
+    public function increaseIntercessions($intercessionId)
+    {
+        $sql = "update public.intercession set intercessions = intercessions + 1 where id = %d";
+        $sql = sprintf($sql, $intercessionId);
+        $is = $this->getDb()->createCommand($sql)->execute();
+        if(!$is)
+            throw new Exception(json_encode($this->getErrors()));
+        return true;
+    }
 }

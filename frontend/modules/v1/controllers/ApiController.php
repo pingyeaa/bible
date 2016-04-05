@@ -777,11 +777,18 @@ class ApiController extends Controller
      */
     public function actionIntercessionJoin($user_id, $intercession_id)
     {
+        $trans = yii::$app->db->beginTransaction();
         try {
+            //查询是否已加入代祷
+            $info = IntercessionJoin::findByIntercessionIdAndIntercessorsId($intercession_id, $user_id);
+            if($info) {
+                $this->code(450, '已加入过该代祷');
+            }
+
             //查询是否有代祷内容
             $interInfo = Intercession::findByIntercessionId($intercession_id);
             if(!$interInfo) {
-                $this->code(450, '代祷内容不存在');
+                $this->code(451, '代祷内容不存在');
             }
 
             //加入代祷入库
@@ -797,9 +804,15 @@ class ApiController extends Controller
             if(!$is)
                 throw new Exception('数据入库失败');
 
+            //更新代祷表中的代祷数
+            $intercession = new Intercession();
+            $intercession->increaseIntercessions($intercession_id);
+
             //返回
+            $trans->commit();
             $this->code(200);
         }catch (Exception $e) {
+            $trans->rollBack();
             $this->code(500, $e->getMessage());
         }
     }
