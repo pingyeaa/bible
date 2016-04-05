@@ -7,6 +7,7 @@ use common\models\AppShare;
 use common\models\Friends;
 use common\models\Intercession;
 use common\models\IntercessionComments;
+use common\models\IntercessionJoin;
 use common\models\ReadingTime;
 use common\models\ShareToday;
 use React\Promise\FunctionRaceTest;
@@ -764,6 +765,49 @@ class ApiController extends Controller
             $this->code(200, '', [
                 'total_share_times' => isset($info['share_times']) ? intval($info['share_times']) + 1 : 1,
             ]);
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 加入代祷接口
+     * @param $user_id
+     * @param $intercession_id
+     */
+    public function actionIntercessionJoin($user_id, $intercession_id)
+    {
+        try {
+            //查询是否有代祷内容
+            $interInfo = Intercession::findByIntercessionId($intercession_id);
+            if(!$interInfo) {
+                $this->code(450, '代祷内容不存在');
+            }
+
+            //加入代祷入库
+            $intercessionJoin = new IntercessionJoin();
+            $is = $intercessionJoin->add([
+                'intercession_id' => $intercession_id,
+                'intercessors_id' => $user_id,
+                'user_id' => $interInfo['user_id'],
+                'created_at' => time(),
+                'updated_at' => time(),
+                'ip' => yii::$app->request->getUserIP(),
+            ]);
+            if(!$is)
+                throw new Exception('数据入库失败');
+
+            //返回
+            $this->code(200);
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    public function actionIntercessionUpdate($user_id, $intercession_id)
+    {
+        try {
+
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
         }

@@ -51,4 +51,13 @@ class Intercession extends ActiveRecord
         ";
         return self::getDb()->createCommand($sql)->queryAll();
     }
+
+    /**
+     * @param $id
+     * @return null|static
+     */
+    public static function findByIntercessionId($id)
+    {
+        return self::findOne(['id' => $id]);
+    }
 }
