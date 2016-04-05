@@ -762,7 +762,7 @@ class ApiController extends Controller
 
             //返回
             $this->code(200, '', [
-                'total_share_times' => isset($info['share_times']) ? intval($info['share_times']) + 1 : 0,
+                'total_share_times' => isset($info['share_times']) ? intval($info['share_times']) + 1 : 1,
             ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
