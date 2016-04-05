@@ -641,6 +641,7 @@ class ApiController extends Controller
 
                 //构造返回数据
                 $data[] = [
+                    'intercession_id' => $v['id'],
                     'content' => $v['content'],
                     'intercession_number' => 0,
                     'avatar' => !$portraitInfo ? '' : yii::$app->qiniu->getDomain() . '/' .$portraitInfo['portrait_name'],
