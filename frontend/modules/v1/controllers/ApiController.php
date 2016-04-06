@@ -8,6 +8,7 @@ use common\models\Friends;
 use common\models\Intercession;
 use common\models\IntercessionComments;
 use common\models\IntercessionJoin;
+use common\models\IntercessionUpdate;
 use common\models\ReadingTime;
 use common\models\ShareToday;
 use React\Promise\FunctionRaceTest;
@@ -817,10 +818,38 @@ class ApiController extends Controller
         }
     }
 
-    public function actionIntercessionUpdate($user_id, $intercession_id)
+    /**
+     * 更新代祷内容
+     * @param $user_id
+     * @param $intercession_id
+     * @param $content
+     */
+    public function actionIntercessionUpdate($user_id, $intercession_id, $content)
     {
         try {
+            //查询是否有代祷内容
+            $interInfo = Intercession::findByIntercessionId($intercession_id);
+            if(!$interInfo) {
+                $this->code(451, '代祷内容不存在');
+            }
 
+            //代祷是否属于该用户
+            if($interInfo['user_id'] !== (int)$user_id) {
+                $this->code(452, '无权更新该代祷');
+            }
+
+            //新增更新代祷内容
+            $update = new IntercessionUpdate();
+            $update->add([
+                'intercession_id' => $intercession_id,
+                'content' => $content,
+                'ip' => yii::$app->request->getUserIP(),
+                'created_at' => time(),
+                'updated_at' => time(),
+            ]);
+
+            //返回
+            $this->code(200);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
         }
