@@ -643,6 +643,7 @@ class ApiController extends Controller
 
                 //构造返回数据
                 $data[] = [
+                    'user_id' => $v['user_id'],
                     'intercession_id' => $v['id'],
                     'content' => $v['content'],
                     'intercession_number' => 0,
