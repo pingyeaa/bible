@@ -641,11 +641,25 @@ class ApiController extends Controller
                 //获取最新头像
                 $portraitInfo = Portrait::findByUserId($v['user_id']);
 
+                //获取代祷更新列表
+                $updateList = IntercessionUpdate::getListWithIntercessionId($v['id']);
+                $resultUpdateList = [];
+                foreach($updateList as $updateInfo) {
+                    $resultUpdateList[] = [
+                        'content' => $updateInfo['content'],
+                        'create_time' => date('Y-m-d H:i:s', $updateInfo['created_at']),
+                    ];
+                }
+                $resultUpdateList = array_merge($resultUpdateList, [[
+                    'content' => $v['content'],
+                    'create_time' => date('Y-m-d H:i:s', $v['created_at']),
+                ]]);
+
                 //构造返回数据
                 $data[] = [
                     'user_id' => $v['user_id'],
                     'intercession_id' => $v['id'],
-                    'content' => $v['content'],
+                    'contentList' => $resultUpdateList,
                     'intercession_number' => 0,
                     'avatar' => !$portraitInfo ? '' : yii::$app->qiniu->getDomain() . '/' .$portraitInfo['portrait_name'],
                     'nick_name' => $v['nickname'],

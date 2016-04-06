@@ -28,4 +28,13 @@ class IntercessionUpdate extends ActiveRecord
             throw new Exception(json_encode($this->getErrors()));
         return true;
     }
+
+    /**
+     * @param $intercessionId
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    public static function getListWithIntercessionId($intercessionId)
+    {
+        return self::find()->where(['intercession_id' => $intercessionId])->orderBy('id desc')->all();
+    }
 }
