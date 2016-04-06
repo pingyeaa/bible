@@ -655,6 +655,16 @@ class ApiController extends Controller
                     'create_time' => date('Y-m-d H:i:s', $v['created_at']),
                 ]]);
 
+                //获取代祷勇士
+                $intercessorsList = IntercessionJoin::getAllByIntercessionId($v['id']);
+                $resultIntercessorsList = [];
+                foreach($intercessorsList as $intercessorsInfo) {
+                    $resultIntercessorsList[] = [
+                        'user_id' => $intercessorsInfo['id'],
+                        'nick_name' => $intercessorsInfo['nickname'],
+                    ];
+                }
+
                 //构造返回数据
                 $data[] = [
                     'user_id' => $v['user_id'],
@@ -666,6 +676,7 @@ class ApiController extends Controller
                     'time' => date('Y-m-d H:i:s', $v['created_at']),
                     'relationship' => $relationship,
                     'position' => $v['position'],
+                    'intercessors_list' => $resultIntercessorsList,
                 ];
             }
             $this->code(200, 'ok', $data);
