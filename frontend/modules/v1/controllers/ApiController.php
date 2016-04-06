@@ -663,7 +663,7 @@ class ApiController extends Controller
                     'intercession_number' => 0,
                     'avatar' => !$portraitInfo ? '' : yii::$app->qiniu->getDomain() . '/' .$portraitInfo['portrait_name'],
                     'nick_name' => $v['nickname'],
-                    'time' => $v['created_at'],
+                    'time' => date('Y-m-d H:i:s', $v['created_at']),
                     'relationship' => $relationship,
                     'position' => $v['position'],
                 ];
