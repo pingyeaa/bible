@@ -890,6 +890,7 @@ class ApiController extends Controller
      */
     public function actionIntercessionCommentsPraise($user_id, $comment_id, $is_cancel)
     {
+        $trans = yii::$app->db->beginTransaction();
         try {
             //评论是否存在
             $commentInfo = IntercessionComments::findWithCommentId($comment_id);
@@ -903,8 +904,11 @@ class ApiController extends Controller
                 if($praiseInfo) {
                     //取消
                     IntercessionCommentPraise::cancel($comment_id, $user_id);
+
+                    //递减评论表点赞数量
+                    $comment = new IntercessionComments();
+                    $comment->decreasePraiseNumber($comment_id);
                 }
-                $this->code(200);
             }else {
                 //检测是否已经点赞
                 $praiseInfo = IntercessionCommentPraise::findWithCommentId($comment_id, $user_id);
@@ -919,13 +923,16 @@ class ApiController extends Controller
                         'updated_at' => time(),
                         'ip' => yii::$app->request->getUserIP(),
                     ]);
-                }
-                $this->code(200);
-            }
 
-            //返回
+                    //递增评论表点赞数量
+                    $comment = new IntercessionComments();
+                    $comment->increasePraiseNumber($comment_id);
+                }
+            }
+            $trans->commit();
             $this->code(200);
         }catch (Exception $e) {
+            $trans->rollBack();
             $this->code(500, $e->getMessage());
         }
     }

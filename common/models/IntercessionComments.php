@@ -37,4 +37,38 @@ class IntercessionComments extends ActiveRecord
     {
         return self::find()->where(['id' => $commentId])->one();
     }
+
+    /**
+     * 递增点赞数量
+     * @param $commentId
+     * @return bool
+     * @throws Exception
+     */
+    public function increasePraiseNumber($commentId)
+    {
+        $sql = "update public.intercession_comments set praise_number = praise_number + 1 where id = %d";
+        $sql = sprintf($sql, $commentId);
+        $result = $this->getDb()->createCommand($sql)->execute();
+        if(!$result) {
+            throw new Exception(json_encode($this->getErrors()));
+        }
+        return true;
+    }
+
+    /**
+     * 递减点赞数量
+     * @param $commentId
+     * @return bool
+     * @throws Exception
+     */
+    public function decreasePraiseNumber($commentId)
+    {
+        $sql = "update public.intercession_comments set praise_number = praise_number - 1 where id = %d";
+        $sql = sprintf($sql, $commentId);
+        $result = $this->getDb()->createCommand($sql)->execute();
+        if(!$result) {
+            throw new Exception(json_encode($this->getErrors()));
+        }
+        return true;
+    }
 }
