@@ -6,6 +6,7 @@ use common\models\ApiLog;
 use common\models\AppShare;
 use common\models\Friends;
 use common\models\Intercession;
+use common\models\IntercessionCommentPraise;
 use common\models\IntercessionComments;
 use common\models\IntercessionJoin;
 use common\models\IntercessionUpdate;
@@ -873,6 +874,54 @@ class ApiController extends Controller
                 'created_at' => time(),
                 'updated_at' => time(),
             ]);
+
+            //返回
+            $this->code(200);
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 点赞
+     * @param $user_id
+     * @param $comment_id
+     * @param $is_cancel 是否取消点赞 true-取消
+     */
+    public function actionIntercessionCommentsPraise($user_id, $comment_id, $is_cancel)
+    {
+        try {
+            //评论是否存在
+            $commentInfo = IntercessionComments::findWithCommentId($comment_id);
+            if(!$commentInfo) {
+                $this->code(451, '评论不存在');
+            }
+
+            if('true' == $is_cancel) {
+                //检测是否已经取消
+                $praiseInfo = IntercessionCommentPraise::findWithCommentId($comment_id, $user_id);
+                if($praiseInfo) {
+                    //取消
+                    IntercessionCommentPraise::cancel($comment_id, $user_id);
+                }
+                $this->code(200);
+            }else {
+                //检测是否已经点赞
+                $praiseInfo = IntercessionCommentPraise::findWithCommentId($comment_id, $user_id);
+                if(!$praiseInfo) {
+                    //取消
+                    $praise = new IntercessionCommentPraise();
+                    $praise->add([
+                        'comment_id' => $comment_id,
+                        'praise_user_id' => $user_id,
+                        'user_id' => $commentInfo['comment_by_id'],
+                        'created_at' => time(),
+                        'updated_at' => time(),
+                        'ip' => yii::$app->request->getUserIP(),
+                    ]);
+                }
+                $this->code(200);
+            }
 
             //返回
             $this->code(200);

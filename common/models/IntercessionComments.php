@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use yii\base\Exception;
 use yii\db\ActiveRecord;
 
 class IntercessionComments extends ActiveRecord
@@ -22,11 +23,18 @@ class IntercessionComments extends ActiveRecord
     {
         $this->isNewRecord = true;
         $this->attributes = $data;
-        return $this->save();
+        if(!$this->save())
+            throw new Exception(json_encode($this->getErrors()));
+        return true;
     }
 
     public static function getAllByIntercessionId($intercessionId)
     {
         return self::find()->where(['intercession_id' => $intercessionId])->orderBy('praise_number desc')->all();
+    }
+
+    public static function findWithCommentId($commentId)
+    {
+        return self::find()->where(['id' => $commentId])->one();
     }
 }

@@ -35,4 +35,24 @@ class IntercessionCommentPraise extends ActiveRecord
         $info = self::find()->select('count(id) as total')->where(['comment_id' => $commentId])->all();
         return isset($info['total']) ? $info['total'] : 0;
     }
+
+    /**
+     * 取消点赞
+     * @param $commentId
+     * @param $userId
+     * @return int
+     */
+    public static function cancel($commentId, $userId)
+    {
+        return self::deleteAll(['comment_id' => $commentId, 'praise_user_id' => $userId]);
+    }
+
+    /**
+     * @param $commentId
+     * @return array|null|ActiveRecord
+     */
+    public static function findWithCommentId($commentId, $userId)
+    {
+        return self::find()->where(['comment_id' => $commentId, 'praise_user_id' => $userId])->one();
+    }
 }
