@@ -746,6 +746,9 @@ class ApiController extends Controller
             if($list) {
                 foreach($list as $info) {
 
+                    //该用户是否点过赞
+                    $is = IntercessionCommentPraise::findWithCommentId($info['id'], $user_id);
+
                     //获取用户资料
                     $commentUserInfo = User::getUserInfoAndAvastar($info['comment_by_id']);
                     $data[] = [
@@ -756,6 +759,7 @@ class ApiController extends Controller
                         'nick_name' => $commentUserInfo['nickname'],
                         'praise_number' => $info['praise_number'],
                         'created_at' => $info['created_at'],
+                        'is_praised' => $is ? 1 : 0,
                     ];
                 }
             }
