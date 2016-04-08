@@ -749,6 +749,7 @@ class ApiController extends Controller
                     //获取用户资料
                     $commentUserInfo = User::getUserInfoAndAvastar($info['comment_by_id']);
                     $data[] = [
+                        'comment_id' => $info['id'],
                         'user_id' => $info['comment_by_id'],
                         'content' => $info['content'],
                         'avatar' => !empty($commentUserInfo['portrait_name']) ? yii::$app->qiniu->getDomain() . '/' . $commentUserInfo['portrait_name'] : '',
