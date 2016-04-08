@@ -42,13 +42,14 @@ class Intercession extends ActiveRecord
         return self::updateAll($data, 'user_id = :user_id', ['user_id' => $userId]);
     }
 
-    public static function findAllByFriendsId($friendsId)
+    public static function findAllByFriendsId($friendsId, $startPage, $pageNo)
     {
         $sql = "
             select b.id, b.content, b.user_id, a.nickname, b.created_at, b.position from public.user a
             inner join public.intercession b on a.id = b.user_id
-            where a.id in (".$friendsId.") order by b.id desc
+            where a.id in (".$friendsId.") order by b.id desc limit %d offset %d
         ";
+        $sql = sprintf($sql, $pageNo, ($startPage - 1) * $pageNo);
         return self::getDb()->createCommand($sql)->queryAll();
     }
 

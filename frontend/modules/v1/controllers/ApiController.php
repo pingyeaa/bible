@@ -589,8 +589,10 @@ class ApiController extends Controller
     /**
      * 代祷列表
      * @param $user_id
+     * @param $start_page
+     * @param $page_no
      */
-    public function actionIntercessionList($user_id)
+    public function actionIntercessionList($user_id, $start_page, $page_no)
     {
         try {
             //查询三维内的好友id
@@ -622,7 +624,7 @@ class ApiController extends Controller
 
             //获取代祷内容列表
             $userIdArray = array_merge($userIdArray, [$user_id]);
-            $intercessionList = Intercession::findAllByFriendsId(implode(',', $userIdArray));
+            $intercessionList = Intercession::findAllByFriendsId(implode(',', $userIdArray), $start_page, $page_no);
 
             //分类数据
             $data = [];
