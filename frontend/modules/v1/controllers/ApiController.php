@@ -592,7 +592,7 @@ class ApiController extends Controller
      * @param $start_page
      * @param $page_no
      */
-    public function actionIntercessionList($user_id, $start_page, $page_no)
+    public function actionIntercessionList($user_id, $start_page = 1, $page_no = 10)
     {
         try {
             //查询三维内的好友id
