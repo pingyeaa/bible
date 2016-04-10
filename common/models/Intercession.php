@@ -77,4 +77,20 @@ class Intercession extends ActiveRecord
             throw new Exception(json_encode($this->getErrors()));
         return true;
     }
+
+    /**
+     * 递增代祷表`评论`数量
+     * @param $intercessionId
+     * @return bool
+     * @throws Exception
+     */
+    public function increaseComments($intercessionId)
+    {
+        $sql = "update public.intercession set comments = comments + 1 where id = %d";
+        $sql = sprintf($sql, $intercessionId);
+        $is = $this->getDb()->createCommand($sql)->execute();
+        if(!$is)
+            throw new Exception(json_encode($this->getErrors()));
+        return true;
+    }
 }

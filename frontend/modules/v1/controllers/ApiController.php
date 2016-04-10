@@ -944,6 +944,48 @@ class ApiController extends Controller
         }
     }
 
+    /**
+     * 评论代祷
+     * @param $user_id
+     * @param $intercession_id
+     * @param $content
+     */
+    public function actionIntercessionCommentsPublication($user_id, $intercession_id, $content)
+    {
+        $trans = yii::$app->db->beginTransaction();
+        try {
+            //代祷是否存在
+            $interInfo = Intercession::findByIntercessionId($intercession_id);
+            if(!$interInfo) {
+                $this->code(451, '代祷内容不存在');
+            }
+
+            //添加代祷
+            $intercessionComments = new IntercessionComments();
+            $intercessionComments->add([
+                'user_id' => $interInfo['user_id'],
+                'intercession_id' => $intercession_id,
+                'comment_by_id' => $user_id,
+                'praise_number' => 0,
+                'ip' => yii::$app->request->getUserIP(),
+                'created_at' => time(),
+                'updated_at' => time(),
+                'content' => $content,
+            ]);
+
+            //递增代祷表评论数量
+            $intercession = new Intercession();
+            $intercession->increaseComments($intercession_id);
+
+            //返回
+            $trans->commit();
+            $this->code(200);
+        }catch (Exception $e) {
+            $trans->rollBack();
+            $this->code(500, $e->getMessage());
+        }
+    }
+
     protected function code($status = 200, $message = '', $data = [])
     {
         $response = yii::$app->getResponse();
