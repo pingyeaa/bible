@@ -826,6 +826,9 @@ class ApiController extends Controller
                 $this->code(451, '代祷内容不存在');
             }
 
+            //查询该用户总共参与了多少次代祷
+            $total = IntercessionJoin::findTotalWithIntercessorsId($user_id);
+
             //加入代祷入库
             $intercessionJoin = new IntercessionJoin();
             $is = $intercessionJoin->add([
@@ -845,7 +848,9 @@ class ApiController extends Controller
 
             //返回
             $trans->commit();
-            $this->code(200);
+            $this->code(200, '', [
+                'total_join_intercession' => $total,
+            ]);
         }catch (Exception $e) {
             $trans->rollBack();
             $this->code(500, $e->getMessage());
