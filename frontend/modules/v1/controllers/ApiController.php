@@ -760,7 +760,7 @@ class ApiController extends Controller
                         'avatar' => !empty($commentUserInfo['portrait_name']) ? yii::$app->qiniu->getDomain() . '/' . $commentUserInfo['portrait_name'] : '',
                         'nick_name' => $commentUserInfo['nickname'],
                         'praise_number' => $info['praise_number'],
-                        'created_at' => $info['created_at'],
+                        'created_at' => $info['created_at'] * 1000,
                         'is_praised' => $is ? 1 : 0,
                     ];
                 }
