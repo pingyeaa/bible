@@ -650,12 +650,12 @@ class ApiController extends Controller
                 foreach($updateList as $updateInfo) {
                     $resultUpdateList[] = [
                         'content' => $updateInfo['content'],
-                        'create_time' => date('Y-m-d H:i:s', $updateInfo['created_at']),
+                        'create_time' => $updateInfo['created_at'] * 1000,
                     ];
                 }
                 $resultUpdateList = array_merge($resultUpdateList, [[
                     'content' => $v['content'],
-                    'create_time' => date('Y-m-d H:i:s', $v['created_at']),
+                    'create_time' => $v['created_at'] * 1000,
                 ]]);
 
                 //获取代祷勇士
@@ -676,7 +676,7 @@ class ApiController extends Controller
                     'intercession_number' => 0,
                     'avatar' => !$portraitInfo ? '' : yii::$app->qiniu->getDomain() . '/' .$portraitInfo['portrait_name'],
                     'nick_name' => $v['nickname'],
-                    'time' => date('Y-m-d H:i:s', $v['created_at']),
+                    'time' => $v['created_at'] * 1000,
                     'relationship' => $relationship,
                     'position' => $v['position'],
                     'intercessors_list' => $resultIntercessorsList,
