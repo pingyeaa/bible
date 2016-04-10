@@ -248,7 +248,7 @@ class User extends ActiveRecord implements IdentityInterface
         $sql = "
             select * from public.user a
             left join public.portrait b on a.id = b.user_id
-            where a.id = %d
+            where a.id = %d order by b.id desc limit 1
         ";
         $sql = sprintf($sql, $userId);
         return self::getDb()->createCommand($sql)->queryOne();

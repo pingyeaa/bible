@@ -539,6 +539,9 @@ class ApiController extends Controller
                 ];
             }
 
+            //设置`该用户已同步过通讯录`的状态
+
+
             $this->code(200, 'ok', $data);
 
         }catch (Exception $e) {
