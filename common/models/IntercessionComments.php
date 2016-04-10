@@ -28,9 +28,9 @@ class IntercessionComments extends ActiveRecord
         return true;
     }
 
-    public static function getAllByIntercessionId($intercessionId)
+    public static function getAllByIntercessionId($intercessionId, $startPage, $pageNo)
     {
-        return self::find()->where(['intercession_id' => $intercessionId])->orderBy('praise_number desc')->all();
+        return self::find()->where(['intercession_id' => $intercessionId])->orderBy('praise_number desc')->offset(($startPage-1)*$pageNo)->limit($pageNo)->all();
     }
 
     public static function findWithCommentId($commentId)

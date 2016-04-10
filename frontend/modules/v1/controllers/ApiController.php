@@ -739,11 +739,12 @@ class ApiController extends Controller
      * 获取评论
      * @param $user_id
      * @param $intercession_id
+     * @param int $start_page
      */
-    public function actionIntercessionComments($user_id, $intercession_id)
+    public function actionIntercessionComments($user_id, $intercession_id, $start_page = 1)
     {
         try{
-            $list = IntercessionComments::getAllByIntercessionId($intercession_id);
+            $list = IntercessionComments::getAllByIntercessionId($intercession_id, $start_page, 10);
             $data = [];
             if($list) {
                 foreach($list as $info) {
