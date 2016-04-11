@@ -902,9 +902,8 @@ class ApiController extends Controller
      * 点赞
      * @param $user_id
      * @param $comment_id
-     * @param $is_cancel 是否取消点赞 true-取消
      */
-    public function actionIntercessionCommentsPraise($user_id, $comment_id, $is_cancel)
+    public function actionIntercessionCommentsPraise($user_id, $comment_id)
     {
         $trans = yii::$app->db->beginTransaction();
         try {
@@ -914,39 +913,35 @@ class ApiController extends Controller
                 $this->code(451, '评论不存在');
             }
 
-            if('true' == $is_cancel) {
-                //检测是否已经取消
-                $praiseInfo = IntercessionCommentPraise::findWithCommentId($comment_id, $user_id);
-                if($praiseInfo) {
-                    //取消
-                    IntercessionCommentPraise::cancel($comment_id, $user_id);
+            //检测是否已经点赞
+            $praiseInfo = IntercessionCommentPraise::findWithCommentId($comment_id, $user_id);
+            if($praiseInfo) {
+                //取消
+                IntercessionCommentPraise::cancel($comment_id, $user_id);
 
-                    //递减评论表点赞数量
-                    $comment = new IntercessionComments();
-                    $comment->decreasePraiseNumber($comment_id);
-                }
+                //递减评论表点赞数量
+                $comment = new IntercessionComments();
+                $comment->decreasePraiseNumber($comment_id);
             }else {
-                //检测是否已经点赞
-                $praiseInfo = IntercessionCommentPraise::findWithCommentId($comment_id, $user_id);
-                if(!$praiseInfo) {
-                    //取消
-                    $praise = new IntercessionCommentPraise();
-                    $praise->add([
-                        'comment_id' => $comment_id,
-                        'praise_user_id' => $user_id,
-                        'user_id' => $commentInfo['comment_by_id'],
-                        'created_at' => time(),
-                        'updated_at' => time(),
-                        'ip' => yii::$app->request->getUserIP(),
-                    ]);
+                //新增
+                $praise = new IntercessionCommentPraise();
+                $praise->add([
+                    'comment_id' => $comment_id,
+                    'praise_user_id' => $user_id,
+                    'user_id' => $commentInfo['comment_by_id'],
+                    'created_at' => time(),
+                    'updated_at' => time(),
+                    'ip' => yii::$app->request->getUserIP(),
+                ]);
 
-                    //递增评论表点赞数量
-                    $comment = new IntercessionComments();
-                    $comment->increasePraiseNumber($comment_id);
-                }
+                //递增评论表点赞数量
+                $comment = new IntercessionComments();
+                $comment->increasePraiseNumber($comment_id);
             }
+
+            //返回
             $trans->commit();
-            $this->code(200);
+            $this->code(200, 'ok', ['status' => $praiseInfo ? false : true]);
         }catch (Exception $e) {
             $trans->rollBack();
             $this->code(500, $e->getMessage());
