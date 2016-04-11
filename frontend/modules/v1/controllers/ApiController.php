@@ -995,6 +995,63 @@ class ApiController extends Controller
         }
     }
 
+    /**
+     * 代祷详情
+     * @param $user_id
+     * @param $intercession_id
+     */
+    public function actionIntercessionDetail($user_id, $intercession_id)
+    {
+        try {
+            //获取代祷信息
+            $intercessionInfo = Intercession::findByIntercessionId($intercession_id);
+            if(!$intercessionInfo) {
+                $this->code(450, '未找到代祷信息');
+            }
+
+            //获取最新头像
+            $portraitInfo = Portrait::findByUserId($user_id);
+
+            //获取代祷更新列表
+            $updateList = IntercessionUpdate::getListWithIntercessionId($intercession_id);
+            $resultUpdateList = [];
+            foreach($updateList as $updateInfo) {
+                $resultUpdateList[] = [
+                    'content' => $updateInfo['content'],
+                    'create_time' => $updateInfo['created_at'] * 1000,
+                ];
+            }
+            $resultUpdateList = array_merge($resultUpdateList, [[
+                'content' => $intercessionInfo['content'],
+                'create_time' => $intercessionInfo['created_at'] * 1000,
+            ]]);
+
+            //获取代祷勇士
+            $intercessorsList = IntercessionJoin::getAllByIntercessionId($intercession_id);
+            $resultIntercessorsList = [];
+            foreach($intercessorsList as $intercessorsInfo) {
+                $resultIntercessorsList[] = [
+                    'user_id' => $intercessorsInfo['id'],
+                    'nick_name' => $intercessorsInfo['nickname'],
+                ];
+            }
+
+            //构造返回数据
+            $data[] = [
+                'content_list' => $resultUpdateList,
+                'intercession_number' => $intercessionInfo['intercessions'],
+                'avatar' => !$portraitInfo ? '' : yii::$app->qiniu->getDomain() . '/' .$portraitInfo['portrait_name'],
+                'time' => $intercessionInfo['created_at'] * 1000,
+                'position' => $intercessionInfo['position'],
+                'intercessors_list' => $resultIntercessorsList,
+            ];
+            $this->code(200, 'ok', $data);
+
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
     protected function code($status = 200, $message = '', $data = [])
     {
         $response = yii::$app->getResponse();
