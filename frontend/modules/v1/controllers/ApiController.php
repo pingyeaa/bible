@@ -676,7 +676,7 @@ class ApiController extends Controller
                     'user_id' => $v['user_id'],
                     'intercession_id' => $v['id'],
                     'content_list' => $resultUpdateList,
-                    'intercession_number' => 0,
+                    'intercession_number' => $v['intercessions'],
                     'avatar' => !$portraitInfo ? '' : yii::$app->qiniu->getDomain() . '/' .$portraitInfo['portrait_name'],
                     'nick_name' => $v['nickname'],
                     'time' => $v['created_at'] * 1000,

@@ -45,7 +45,7 @@ class Intercession extends ActiveRecord
     public static function findAllByFriendsId($friendsId, $startPage, $pageNo)
     {
         $sql = "
-            select b.id, b.content, b.user_id, a.nickname, b.created_at, b.position from public.user a
+            select b.id, b.content, b.user_id, a.nickname, b.created_at, b.position, b.intercessions from public.user a
             inner join public.intercession b on a.id = b.user_id
             where a.id in (".$friendsId.") order by b.id desc limit %d offset %d
         ";
