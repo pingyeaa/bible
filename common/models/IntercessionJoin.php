@@ -29,7 +29,7 @@ class IntercessionJoin extends ActiveRecord
     {
         $sql = "
             select a.id,a.nickname from public.user a inner join public.intercession_join b
-            on a.id = b.user_id where b.intercession_id = %d
+            on a.id = b.intercessors_id where b.intercession_id = %d
         ";
         $sql = sprintf($sql, $intercessionId);
         return self::getDb()->createCommand($sql)->queryAll();
