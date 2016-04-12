@@ -1032,7 +1032,7 @@ class ApiController extends Controller
             }
 
             //构造返回数据
-            $data[] = [
+            $data = [
                 'content_list' => $resultUpdateList,
                 'intercession_number' => $intercessionInfo['intercessions'],
                 'avatar' => !$portraitInfo ? '' : yii::$app->qiniu->getDomain() . '/' .$portraitInfo['portrait_name'],
