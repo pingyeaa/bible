@@ -12,6 +12,7 @@ use common\models\IntercessionJoin;
 use common\models\IntercessionUpdate;
 use common\models\ReadingTime;
 use common\models\ShareToday;
+use common\models\SyncContactsRecord;
 use React\Promise\FunctionRaceTest;
 use yii;
 use common\models\NickList;
@@ -540,8 +541,13 @@ class ApiController extends Controller
             }
 
             //设置`该用户已同步过通讯录`的状态
+            $sync = new SyncContactsRecord();
+            $sync->add([
+                'user_id' => $user_id,
+                'created_at' => time(),
+            ]);
 
-
+            //返回
             $this->code(200, 'ok', $data);
 
         }catch (Exception $e) {
@@ -732,10 +738,13 @@ class ApiController extends Controller
                 $permission = 0;
             }
 
+            //是否已同步过通讯录
+            $syncInfo = SyncContactsRecord::findByUserId($user_id);
+
             //返回
             $this->code(200, 'ok', [
                 'permission' => $permission,
-                'is_synced' => 1,
+                'is_synced' => $syncInfo ? 1 : 0,
             ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
