@@ -57,4 +57,9 @@ class IntercessionJoin extends ActiveRecord
         $info = self::getDb()->createCommand($sql)->queryOne();
         return $info['total'];
     }
+
+    public static function findWithIntercessorsIdAndIntercessionId($intercessorsId, $intercessionId)
+    {
+        return self::findOne(['intercession_id' => $intercessionId, 'intercessors_id' => $intercessorsId]);
+    }
 }

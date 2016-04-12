@@ -671,6 +671,9 @@ class ApiController extends Controller
                     ];
                 }
 
+                //是否已经加入代祷
+                $intercessionJoinInfo = IntercessionJoin::findByIntercessionIdAndIntercessorsId($v['id'], $user_id);
+
                 //构造返回数据
                 $data[] = [
                     'user_id' => $v['user_id'],
@@ -683,6 +686,7 @@ class ApiController extends Controller
                     'relationship' => $relationship,
                     'position' => $v['position'],
                     'intercessors_list' => $resultIntercessorsList,
+                    'is_interceded' => $intercessionJoinInfo ? true : false,
                 ];
             }
             $this->code(200, 'ok', $data);
@@ -1031,6 +1035,9 @@ class ApiController extends Controller
                 ];
             }
 
+            //是否已经加入代祷
+            $intercessionJoinInfo = IntercessionJoin::findByIntercessionIdAndIntercessorsId($intercession_id, $user_id);
+
             //构造返回数据
             $data = [
                 'content_list' => $resultUpdateList,
@@ -1039,6 +1046,7 @@ class ApiController extends Controller
                 'time' => $intercessionInfo['created_at'] * 1000,
                 'position' => $intercessionInfo['position'],
                 'intercessors_list' => $resultIntercessorsList,
+                'is_interceded' => $intercessionJoinInfo ? true : false,
             ];
             $this->code(200, 'ok', $data);
 
