@@ -1018,7 +1018,7 @@ class ApiController extends Controller
             }
 
             //获取最新头像
-            $portraitInfo = Portrait::findByUserId($user_id);
+            $portraitInfo = Portrait::findByUserId($intercessionInfo['user_id']);
 
             //获取代祷更新列表
             $updateList = IntercessionUpdate::getListWithIntercessionId($intercession_id);
@@ -1047,6 +1047,9 @@ class ApiController extends Controller
             //是否已经加入代祷
             $intercessionJoinInfo = IntercessionJoin::findByIntercessionIdAndIntercessorsId($intercession_id, $user_id);
 
+            //获取代祷发布人的昵称
+            $userInfo = User::findIdentity($intercessionInfo['user_id']);
+
             //构造返回数据
             $data = [
                 'content_list' => $resultUpdateList,
@@ -1056,6 +1059,7 @@ class ApiController extends Controller
                 'position' => $intercessionInfo['position'],
                 'intercessors_list' => $resultIntercessorsList,
                 'is_interceded' => $intercessionJoinInfo ? true : false,
+                'nick_name' => $userInfo['nickname'],
             ];
             $this->code(200, 'ok', $data);
 
