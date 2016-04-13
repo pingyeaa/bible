@@ -693,6 +693,7 @@ class ApiController extends Controller
                     'position' => $v['position'],
                     'intercessors_list' => $resultIntercessorsList,
                     'is_interceded' => $intercessionJoinInfo ? true : false,
+                    'gender' => $v['gender'],
                 ];
             }
             $this->code(200, 'ok', $data);
