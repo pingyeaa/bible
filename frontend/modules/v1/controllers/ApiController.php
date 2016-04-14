@@ -780,6 +780,7 @@ class ApiController extends Controller
                         'praise_number' => $info['praise_number'],
                         'created_at' => $info['created_at'] * 1000,
                         'is_praised' => $is ? 1 : 0,
+                        'gender' => $commentUserInfo['gender'],
                     ];
                 }
             }
@@ -1061,6 +1062,8 @@ class ApiController extends Controller
                 'intercessors_list' => $resultIntercessorsList,
                 'is_interceded' => $intercessionJoinInfo ? true : false,
                 'nick_name' => $userInfo['nickname'],
+                'user_id' => $intercessionInfo['user_id'],
+                'gender' => $userInfo['gender'],
             ];
             $this->code(200, 'ok', $data);
 
