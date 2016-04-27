@@ -714,8 +714,12 @@ class ApiController extends Controller
             if(!$newInfo) {
                 $this->code(450, '没有分享内容');
             }
+
+            //连续阅读天数
+            $readingInfo = ReadingTime::findByUserId($user_id);
+
             $this->code(200, '', [
-                'continuous_interces_days' => 0,    //连续代祷天数
+                'continuous_interces_days' => $readingInfo ? $readingInfo['continuous_days'] : 0,    //连续代祷天数
                 'share_number' => $newInfo['share_number'],
                 'share_today' => $newInfo['share_content'],
             ]);
