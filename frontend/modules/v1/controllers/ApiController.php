@@ -446,8 +446,8 @@ class ApiController extends Controller
                         'last_minutes' => $info['last_minutes'],
                         'total_minutes' => $info['total_minutes'],
                         'notice' => $notice,
-                        'yesterday_minutes' => $info['yesterday_minutes'],
-                        'today_minutes' => $info['today_minutes'],
+                        'yesterday_minutes' => (int)$info['yesterday_minutes'],
+                        'today_minutes' => (int)$info['today_minutes'],
                     ]);
                 }
 
