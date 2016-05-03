@@ -117,6 +117,8 @@ class ApiController extends Controller
                 'continuous_days' => $readInfo ? $readInfo['continuous_days'] : 0,    //连续阅读天数
                 'total_minutes' => $readInfo ? $readInfo['total_minutes'] : 0,    //总阅读分钟数
                 'total_share_times' => isset($shareInfo['share_times']) ? $shareInfo['share_times'] : 0,    //分享统计次数
+                'yesterday_minutes' => (int)$readInfo['yesterday_minutes'],
+                'today_minutes' => (int)$readInfo['today_minutes'],
             ]);
 
         }catch (yii\base\Exception $e){
@@ -421,8 +423,10 @@ class ApiController extends Controller
      * @param $continuous_days 连续天数
      * @param $total_minutes 总阅读天数
      * @param $is_add true-覆盖数据库 false-不覆盖数据库
+     * @param $yesterday_minutes
+     * @param $today_minutes
      */
-    public function actionReadingTime($user_id, $last_minutes, $continuous_days, $total_minutes, $is_add)
+    public function actionReadingTime($user_id, $last_minutes, $continuous_days, $total_minutes, $is_add, $yesterday_minutes = 0, $today_minutes = 0)
     {
         try {
             if($last_minutes < 0 || $continuous_days < 0) {
@@ -442,6 +446,8 @@ class ApiController extends Controller
                         'last_minutes' => $info['last_minutes'],
                         'total_minutes' => $info['total_minutes'],
                         'notice' => $notice,
+                        'yesterday_minutes' => $info['yesterday_minutes'],
+                        'today_minutes' => $info['today_minutes'],
                     ]);
                 }
 
@@ -450,6 +456,8 @@ class ApiController extends Controller
                     'total_minutes' => (int)$total_minutes,
                     'continuous_days' => (int)$continuous_days,
                     'last_minutes' => (int)$last_minutes,
+                    'yesterday_minutes' => (int)$yesterday_minutes,
+                    'today_minutes' => (int)$today_minutes,
                     'updated_at' => time()
                 ], $user_id);
                 if(!$is) throw new Exception('阅读统计修改失败');
@@ -461,6 +469,8 @@ class ApiController extends Controller
                     'total_minutes' => (int)$total_minutes,
                     'continuous_days' => (int)$continuous_days,
                     'last_minutes' => (int)$last_minutes,
+                    'yesterday_minutes' => (int)$yesterday_minutes,
+                    'today_minutes' => (int)$today_minutes,
                     'created_at' => time(),
                     'updated_at' => time(),
                 ]);
@@ -470,6 +480,8 @@ class ApiController extends Controller
                 'continuous_days' => $continuous_days,
                 'last_minutes' => $last_minutes,
                 'total_minutes' => $total_minutes,
+                'yesterday_minutes' => (int)$yesterday_minutes,
+                'today_minutes' => (int)$today_minutes,
                 'notice' => $notice,
             ]);
 
