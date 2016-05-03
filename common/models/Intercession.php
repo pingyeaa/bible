@@ -26,9 +26,9 @@ class Intercession extends ActiveRecord
         return $this->save();
     }
 
-    public static function findByUserId($userId)
+    public static function findAllByUserId($userId, $startPage = 1, $pageNo = 10)
     {
-        return self::find()->where(['user_id' => $userId])->orderBy('id desc')->one();
+        return self::find()->where(['user_id' => $userId])->limit($pageNo)->offset(($startPage - 1) * $pageNo)->orderBy('id desc')->all();
     }
 
     /**

@@ -62,4 +62,16 @@ class IntercessionJoin extends ActiveRecord
     {
         return self::findOne(['intercession_id' => $intercessionId, 'intercessors_id' => $intercessorsId]);
     }
+
+    public static function findAllByUserId($userId, $startPage, $pageNo)
+    {
+        $sql = "
+            select * from public.user a
+            inner join public.intercession_join b on a.id = b.intercessors_id
+            inner join public.intercession c on b.intercession_id = c.id
+            where a.id = %d order by c.id desc limit %d offset %d
+        ";
+        $sql = sprintf($sql, $userId, $startPage, ($startPage - 1) * $pageNo);
+        return self::getDb()->createCommand($sql)->queryAll();
+    }
 }

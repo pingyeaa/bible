@@ -598,12 +598,23 @@ class ApiController extends Controller
     /**
      * 代祷列表
      * @param $user_id
-     * @param $start_page
-     * @param $page_no
+     * @param int $start_page
+     * @param int $page_no
+     * @param int $intercession_type 0-所有人的代祷|1-我的代祷|2-我参与的代祷
      */
-    public function actionIntercessionList($user_id, $start_page = 1, $page_no = 10)
+    public function actionIntercessionList($user_id, $start_page = 1, $page_no = 10, $intercession_type = 0)
     {
         try {
+            if(1 == $intercession_type) {
+                $data = $this->myIntercessionList($user_id, $start_page, $page_no);
+                $this->code(200, 'ok', $data);
+            }
+
+            if(2 == $intercession_type) {
+                $data = $this->myJoinIntercessionList($user_id, $start_page, $page_no);
+                $this->code(200, 'ok', $data);
+            }
+
             //查询三维内的好友id
             $allIdArray = Friends::findFriendsByUserIdAndDepth($user_id, 3);
 
@@ -1074,6 +1085,178 @@ class ApiController extends Controller
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
         }
+    }
+
+    /**
+     * 获取我的代祷列表
+     * @param $user_id
+     * @param $start_page
+     * @param $page_no
+     * @throws Exception
+     * @return array
+     */
+    protected function myIntercessionList($user_id, $start_page, $page_no)
+    {
+        $intercessionList = Intercession::findAllByUserId($user_id, $start_page, $page_no);
+
+        //获取最新头像
+        $portraitInfo = Portrait::findByUserId($user_id);
+
+        //获取用户信息
+        $userInfo = User::findIdentity($user_id);
+        if(!$userInfo)
+            throw new Exception('用户不存在');
+
+        //分类数据
+        $data = [];
+        if($intercessionList) {
+            foreach($intercessionList as $v) {
+
+                //获取代祷更新列表
+                $updateList = IntercessionUpdate::getListWithIntercessionId($v['id']);
+                $resultUpdateList = [];
+                foreach($updateList as $updateInfo) {
+                    $resultUpdateList[] = [
+                        'content' => $updateInfo['content'],
+                        'create_time' => $updateInfo['created_at'] * 1000,
+                    ];
+                }
+                $resultUpdateList = array_merge($resultUpdateList, [[
+                    'content' => $v['content'],
+                    'create_time' => $v['created_at'] * 1000,
+                ]]);
+
+                //获取代祷勇士
+                $intercessorsList = IntercessionJoin::getAllByIntercessionId($v['id']);
+                $resultIntercessorsList = [];
+                foreach($intercessorsList as $intercessorsInfo) {
+                    $resultIntercessorsList[] = [
+                        'user_id' => $intercessorsInfo['id'],
+                        'nick_name' => $intercessorsInfo['nickname'],
+                    ];
+                }
+
+                //构造返回数据
+                $data[] = [
+                    'user_id' => $v['user_id'],
+                    'intercession_id' => $v['id'],
+                    'content_list' => $resultUpdateList,
+                    'intercession_number' => $v['intercessions'],
+                    'avatar' => !$portraitInfo ? '' : yii::$app->qiniu->getDomain() . '/' .$portraitInfo['portrait_name'],
+                    'nick_name' => $userInfo['nickname'],
+                    'time' => $v['created_at'] * 1000,
+                    'relationship' => 0,
+                    'position' => $v['position'],
+                    'intercessors_list' => $resultIntercessorsList,
+                    'is_interceded' => true,
+                    'gender' => $userInfo['gender'],
+                ];
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * 获取我加入的代祷列表
+     * @param $user_id
+     * @param $start_page
+     * @param $page_no
+     * @throws Exception
+     * @return array
+     */
+    protected function myJoinIntercessionList($user_id, $start_page, $page_no)
+    {
+        //查询三维内的好友id
+        $allIdArray = Friends::findFriendsByUserIdAndDepth($user_id, 3);
+
+        //处理数组
+        $handleArray = [];
+        foreach($allIdArray as $v) {
+            $handleArray[$v['depth']][] = $v['friend_user_id'];
+        }
+        $userIdArray = $newArray = [];
+        foreach($handleArray as $k => $handleIdArray) {
+            $handleIdArray = array_unique($handleIdArray);
+            if(1 != $k) {
+                foreach($handleIdArray as $handleKey => $handleValue) {
+                    $handleArray[1] = isset($handleArray[1]) ? $handleArray[1] : [];
+                    $handleArray[2] = isset($handleArray[2]) ? $handleArray[2] : [];
+                    if(2 == $k && (in_array($handleValue, $handleArray[1]) || $handleValue == $user_id)) {
+                        unset($handleIdArray[$handleKey]);
+                    }
+                    if(3 == $k && (in_array($handleValue, $handleArray[1]) || in_array($handleValue, $handleArray[2]) || $handleValue == $user_id)) {
+                        unset($handleIdArray[$handleKey]);
+                    }
+                }
+            }
+            $newArray[$k] = $handleIdArray;
+            $userIdArray = array_merge($userIdArray, $handleIdArray);
+        }
+
+        //查询参与的代祷列表
+        $intercessionList = IntercessionJoin::findAllByUserId($user_id, $start_page, $page_no);
+
+        //分类数据
+        $data = [];
+        if($intercessionList) {
+            foreach($intercessionList as $v) {
+
+                //代祷人与自己的关系
+                $relationship = 0;
+                foreach($newArray as $kUser => $vUser) {
+                    if($user_id == $v['user_id']) {
+                        $relationship = 0;
+                    }
+                    if(in_array($v['user_id'], $vUser)) {
+                        $relationship = $kUser;
+                    }
+                }
+
+                //获取最新头像
+                $portraitInfo = Portrait::findByUserId($user_id);
+
+                //获取代祷更新列表
+                $updateList = IntercessionUpdate::getListWithIntercessionId($v['id']);
+                $resultUpdateList = [];
+                foreach($updateList as $updateInfo) {
+                    $resultUpdateList[] = [
+                        'content' => $updateInfo['content'],
+                        'create_time' => $updateInfo['created_at'] * 1000,
+                    ];
+                }
+                $resultUpdateList = array_merge($resultUpdateList, [[
+                    'content' => $v['content'],
+                    'create_time' => $v['created_at'] * 1000,
+                ]]);
+
+                //获取代祷勇士
+                $intercessorsList = IntercessionJoin::getAllByIntercessionId($v['id']);
+                $resultIntercessorsList = [];
+                foreach($intercessorsList as $intercessorsInfo) {
+                    $resultIntercessorsList[] = [
+                        'user_id' => $intercessorsInfo['id'],
+                        'nick_name' => $intercessorsInfo['nickname'],
+                    ];
+                }
+
+                //构造返回数据
+                $data[] = [
+                    'user_id' => $v['user_id'],
+                    'intercession_id' => $v['id'],
+                    'content_list' => $resultUpdateList,
+                    'intercession_number' => $v['intercessions'],
+                    'avatar' => !$portraitInfo ? '' : yii::$app->qiniu->getDomain() . '/' .$portraitInfo['portrait_name'],
+                    'nick_name' => $v['nickname'],
+                    'time' => $v['created_at'] * 1000,
+                    'relationship' => $relationship,
+                    'position' => $v['position'],
+                    'intercessors_list' => $resultIntercessorsList,
+                    'is_interceded' => true,
+                    'gender' => $v['gender'],
+                ];
+            }
+        }
+        return $data;
     }
 
     protected function code($status = 200, $message = '', $data = [])
