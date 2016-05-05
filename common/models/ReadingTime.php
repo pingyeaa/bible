@@ -14,7 +14,7 @@ class ReadingTime extends ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'total_minutes', 'last_minutes', 'continuous_days', 'created_at', 'updated_at', 'yesterday_minutes', 'today_minutes'], 'required']
+            [['user_id', 'total_minutes', 'last_minutes', 'continuous_days', 'created_at', 'updated_at', 'yesterday_minutes', 'today_minutes', 'last_read_long'], 'required']
         ];
     }
 
