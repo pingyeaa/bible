@@ -1225,7 +1225,7 @@ class ApiController extends Controller
                 }
 
                 //获取最新头像
-                $portraitInfo = Portrait::findByUserId($user_id);
+                $portraitInfo = Portrait::findByUserId($v['user_id']);
 
                 //获取代祷更新列表
                 $updateList = IntercessionUpdate::getListWithIntercessionId($v['id']);

@@ -69,7 +69,7 @@ class IntercessionJoin extends ActiveRecord
             select * from public.user a
             inner join public.intercession_join b on a.id = b.intercessors_id
             inner join public.intercession c on b.intercession_id = c.id
-            where a.id = %d order by c.id desc limit %d offset %d
+            where b.user_id = %d order by c.id desc limit %d offset %d
         ";
         $sql = sprintf($sql, $userId, $startPage, ($startPage - 1) * $pageNo);
         return self::getDb()->createCommand($sql)->queryAll();
