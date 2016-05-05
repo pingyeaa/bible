@@ -716,7 +716,7 @@ class ApiController extends Controller
                     'position' => $v['position'],
                     'intercessors_list' => $resultIntercessorsList,
                     'is_interceded' => $intercessionJoinInfo ? true : false,
-                    'gender' => $v['gender'],
+                    'gender' => (int)$v['gender'],
                 ];
             }
             $this->code(200, 'ok', $data);
@@ -1161,7 +1161,7 @@ class ApiController extends Controller
                     'position' => $v['position'],
                     'intercessors_list' => $resultIntercessorsList,
                     'is_interceded' => true,
-                    'gender' => $userInfo['gender'],
+                    'gender' => (int)$userInfo['gender'],
                 ];
             }
         }
@@ -1264,7 +1264,7 @@ class ApiController extends Controller
                     'position' => $v['position'],
                     'intercessors_list' => $resultIntercessorsList,
                     'is_interceded' => true,
-                    'gender' => $v['gender'],
+                    'gender' => (int)$v['gender'],
                 ];
             }
         }
