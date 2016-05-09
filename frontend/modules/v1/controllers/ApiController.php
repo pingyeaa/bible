@@ -405,7 +405,7 @@ class ApiController extends Controller
                 'nick_id' => $nickInfo['nickList']['nick_id'],
                 'gender' => (int)$gender,
                 'birthday' => date('Y-m-d', strtotime($birthday)),
-                'believe_date' => date('Y-m-d', strtotime($believe_date)),
+                'believe_date' => $believe_date,
                 'province_id' => $province_id,
                 'city_id' => $city_id,
                 'province_name' => $province_name,
