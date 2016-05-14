@@ -36,4 +36,13 @@ class IntercessionStatistics extends ActiveRecord
     {
         return self::deleteAll(['user_id' => $userId]);
     }
+
+    /**
+     * @param $userId
+     * @return array|null|ActiveRecord
+     */
+    public static function findWithUserId($userId)
+    {
+        return self::find()->where(['user_id' => $userId])->one();
+    }
 }
