@@ -736,10 +736,10 @@ class ApiController extends Controller
     /**
      * 活石`tab`页面内容
      * @param $user_id
-     * @param 连续代祷天数|int $continuous_interces_days 连续代祷天数
-     * @param 连续阅读天数|int $continuous_days 连续阅读天数
+     * @param int $continuous_interces_days 连续代祷天数
+     * @param int $last_interces_time 上次代祷时间
      */
-    public function actionHuoshiTab($user_id, $continuous_interces_days = 0, $continuous_days = 0)
+    public function actionHuoshiTab($user_id, $continuous_interces_days = 0, $last_interces_time = 0)
     {
         try{
             $newInfo = ShareToday::findNewInfo();
@@ -747,12 +747,24 @@ class ApiController extends Controller
                 $this->code(450, '没有分享内容');
             }
 
+            //删除旧的统计数据
+            //写入新代祷统计数据
+            IntercessionStatistics::deleteInfo($user_id);
+            $intercessionStatistics = new IntercessionStatistics();
+            $intercessionStatistics->add([
+                'user_id' => $user_id,
+                'continuous_interces_days' => $continuous_interces_days,
+                'last_interces_time' => $last_interces_time,
+                'created_at' => time(),
+                'updated_at' => time(),
+            ]);
+
             //连续阅读天数
             $readingInfo = ReadingTime::findByUserId($user_id);
 
             $this->code(200, '', [
-                'continuous_interces_days' => $readingInfo ? $readingInfo['continuous_days'] : 0,    //连续代祷天数
-//                'continuous_interces_days' => $readingInfo ? $readingInfo['continuous_days'] : 0,    //连续代祷天数
+                'continuous_interces_days' => $continuous_interces_days,    //连续代祷天数
+                'continuous_days' => isset($readingInfo['continuous_days']) ? $readingInfo['continuous_days'] : 0,    //连续阅读天数
                 'share_number' => $newInfo['share_number'],
                 'share_today' => $newInfo['share_content'],
             ]);
