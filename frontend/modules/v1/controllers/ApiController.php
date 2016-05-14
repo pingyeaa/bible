@@ -9,6 +9,7 @@ use common\models\Intercession;
 use common\models\IntercessionCommentPraise;
 use common\models\IntercessionComments;
 use common\models\IntercessionJoin;
+use common\models\IntercessionStatistics;
 use common\models\IntercessionUpdate;
 use common\models\ReadingTime;
 use common\models\ShareToday;
@@ -424,8 +425,8 @@ class ApiController extends Controller
      * @param $continuous_days 连续天数
      * @param $total_minutes 总阅读天数
      * @param $is_add true-覆盖数据库 false-不覆盖数据库
-     * @param int $yesterday_minutes
-     * @param int $today_minutes
+     * @param int $yesterday_minutes 昨日阅读时间
+     * @param int $today_minutes 今日阅读时间
      * @param int $last_read_long 上次阅读结束时间
      */
     public function actionReadingTime($user_id, $last_minutes, $continuous_days, $total_minutes, $is_add, $yesterday_minutes = 0, $today_minutes = 0, $last_read_long = 0)
@@ -735,8 +736,10 @@ class ApiController extends Controller
     /**
      * 活石`tab`页面内容
      * @param $user_id
+     * @param 连续代祷天数|int $continuous_interces_days 连续代祷天数
+     * @param 连续阅读天数|int $continuous_days 连续阅读天数
      */
-    public function actionHuoshiTab($user_id)
+    public function actionHuoshiTab($user_id, $continuous_interces_days = 0, $continuous_days = 0)
     {
         try{
             $newInfo = ShareToday::findNewInfo();
@@ -749,6 +752,7 @@ class ApiController extends Controller
 
             $this->code(200, '', [
                 'continuous_interces_days' => $readingInfo ? $readingInfo['continuous_days'] : 0,    //连续代祷天数
+//                'continuous_interces_days' => $readingInfo ? $readingInfo['continuous_days'] : 0,    //连续代祷天数
                 'share_number' => $newInfo['share_number'],
                 'share_today' => $newInfo['share_content'],
             ]);
@@ -861,8 +865,11 @@ class ApiController extends Controller
      * 加入代祷接口
      * @param $user_id
      * @param $intercession_id
+     * @param 连续代祷天数|int $continuous_interces_days 连续代祷天数
+     * @param 上次代祷时间|int $last_interces_time 上次代祷时间
+     * @throws \common\models\Exception
      */
-    public function actionIntercessionJoin($user_id, $intercession_id)
+    public function actionIntercessionJoin($user_id, $intercession_id, $continuous_interces_days = 0, $last_interces_time = 0)
     {
         $trans = yii::$app->db->beginTransaction();
         try {
@@ -898,9 +905,23 @@ class ApiController extends Controller
             $intercession = new Intercession();
             $intercession->increaseIntercessions($intercession_id);
 
+            //删除旧的统计数据
+            //写入新代祷统计数据
+            IntercessionStatistics::deleteInfo($user_id);
+            $intercessionStatistics = new IntercessionStatistics();
+            $intercessionStatistics->add([
+                'user_id' => $user_id,
+                'continuous_interces_days' => $continuous_interces_days,
+                'last_interces_time' => $last_interces_time,
+                'created_at' => time(),
+                'updated_at' => time(),
+            ]);
+
             //返回
             $trans->commit();
             $this->code(200, '', [
+                'continuous_interces_days' => $continuous_interces_days,
+                'last_interces_time' => $last_interces_time,
                 'total_join_intercession' => $total,
             ]);
         }catch (Exception $e) {

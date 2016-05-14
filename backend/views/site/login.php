@@ -8,28 +8,20 @@ use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 
 $this->title = '登录';
-$this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="site-login">
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>请填写以下表单：</p>
-
     <div class="row">
         <div class="col-lg-5">
-            <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
-
-                <?= $form->field($model, 'username') ?>
-
-                <?= $form->field($model, 'password')->passwordInput() ?>
-
-                <?= $form->field($model, 'rememberMe')->checkbox() ?>
-
+            <form action="" method="post" id="login-form">
+                <label style="color: red"><?php echo $message;?></label><br>
+                <label>用户名</label>
+                <input type="text" name="username" class="form-control" /><br>
+                <label>密码</label>
+                <input type="password" name="password" class="form-control" /><br>
                 <div class="form-group">
-                    <?= Html::submitButton('Login', ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
+                    <button type="submit" class="btn btn-primary">提交</button>
                 </div>
-
-            <?php ActiveForm::end(); ?>
+            </form>
         </div>
     </div>
 </div>

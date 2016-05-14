@@ -1,6 +1,7 @@
 <?php
 namespace backend\controllers;
 
+use common\models\Admin;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -12,6 +13,8 @@ use yii\filters\VerbFilter;
  */
 class SiteController extends Controller
 {
+    public $enableCsrfValidation = false;
+
     /**
      * @inheritdoc
      */
@@ -58,20 +61,25 @@ class SiteController extends Controller
         return $this->render('index');
     }
 
+    /**
+     * 登录
+     * @return string|\yii\web\Response
+     */
     public function actionLogin()
     {
-        if (!\Yii::$app->user->isGuest) {
+        if (isset($_SESSION['admin_id'])) {
             return $this->goHome();
         }
 
-        $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+        if($post = Yii::$app->request->post()) {
+            $result = Admin::validateIdentify($post['username'], md5($post['password']));
+            if(!$result) {
+                return $this->render('login', ['message' => '账号或密码错误']);
+            }
+            $_SESSION['admin_id'] = $result['id'];
             return $this->goBack();
-        } else {
-            return $this->render('login', [
-                'model' => $model,
-            ]);
         }
+        return $this->render('login', ['message' => '']);
     }
 
     public function actionLogout()

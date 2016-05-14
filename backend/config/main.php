@@ -14,8 +14,8 @@ return [
     'modules' => [],
     'components' => [
         'user' => [
-            'identityClass' => 'common\models\Admin1',
-            'enableAutoLogin' => true,
+            'identityClass' => 'common\models\Admin',
+//            'enableAutoLogin' => true,
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
