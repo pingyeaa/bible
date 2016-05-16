@@ -1170,7 +1170,7 @@ class ApiController extends Controller
             return $this->code(200, 'ok', [
                 'latest_version' => $latestVersion,
                 'description' => $versionInfo['description'],
-                'updated_at' => $versionInfo['created_at'],
+                'updated_at' => $versionInfo['created_at'] * 1000,
             ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
