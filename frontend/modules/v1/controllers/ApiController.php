@@ -4,6 +4,7 @@ namespace app\modules\v1\controllers;
 
 use common\models\ApiLog;
 use common\models\AppShare;
+use common\models\AppVersion;
 use common\models\Friends;
 use common\models\Intercession;
 use common\models\IntercessionCommentPraise;
@@ -1138,6 +1139,39 @@ class ApiController extends Controller
             ];
             $this->code(200, 'ok', $data);
 
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 检测新版本
+     * @param $user_id
+     * @param $version
+     * @param $platform
+     */
+    public function actionVersion($user_id, $version, $platform)
+    {
+        try {
+            if($platform == 'android') {
+                $versionInfo = AppVersion::findLatestVersion(1);
+            }else {
+                $versionInfo = AppVersion::findLatestVersion(2);
+            }
+            if(!$versionInfo) {
+                echo json_encode([], JSON_FORCE_OBJECT);exit;
+            }
+            $latestVersion = $versionInfo['version'];
+            $latestVersionNumber = str_replace('.', '', $latestVersion);
+            $versionNumber = str_replace('.', '', $version);
+            if($latestVersionNumber <= $versionNumber) {
+                echo json_encode([], JSON_FORCE_OBJECT);exit;
+            }
+            return $this->code(200, 'ok', [
+                'latest_version' => $latestVersion,
+                'description' => $versionInfo['description'],
+                'updated_at' => $versionInfo['created_at'],
+            ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
         }
