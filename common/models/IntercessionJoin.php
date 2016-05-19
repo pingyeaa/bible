@@ -67,7 +67,7 @@ class IntercessionJoin extends ActiveRecord
     {
         $sql = "
             select * from public.user a
-            inner join public.intercession_join b on a.id = b.intercessors_id
+            inner join public.intercession_join b on a.id = b.user_id
             inner join public.intercession c on b.intercession_id = c.id
             where b.intercessors_id = %d order by c.id desc limit %d offset %d
         ";
