@@ -1168,10 +1168,11 @@ class ApiController extends Controller
             if($latestVersionNumber <= $versionNumber) {
                 echo json_encode([], JSON_FORCE_OBJECT);exit;
             }
-            return $this->code(200, 'ok', [
+            $this->code(200, 'ok', [
                 'latest_version' => $latestVersion,
                 'description' => $versionInfo['description'],
                 'updated_at' => $versionInfo['created_at'] * 1000,
+                'download_url' => '',
             ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
