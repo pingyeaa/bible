@@ -1186,7 +1186,7 @@ class ApiController extends Controller
         try {
             $askInfo = AskedDaily::findLasted();
             if(!$askInfo) {
-                $this->code(451, '未找到每日一问内容');
+                $this->code(450, '未找到每日一问内容');
             }
             $this->code(200, 'ok', [
                 'title' => $askInfo['title'],
