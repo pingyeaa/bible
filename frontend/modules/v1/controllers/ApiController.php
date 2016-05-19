@@ -5,6 +5,7 @@ namespace app\modules\v1\controllers;
 use common\models\ApiLog;
 use common\models\AppShare;
 use common\models\AppVersion;
+use common\models\AskedDaily;
 use common\models\Friends;
 use common\models\Intercession;
 use common\models\IntercessionCommentPraise;
@@ -1171,6 +1172,26 @@ class ApiController extends Controller
                 'latest_version' => $latestVersion,
                 'description' => $versionInfo['description'],
                 'updated_at' => $versionInfo['created_at'] * 1000,
+            ]);
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 每日一问
+     */
+    public function actionAskedDaily()
+    {
+        try {
+            $askInfo = AskedDaily::findLasted();
+            if(!$askInfo) {
+                $this->code(451, '未找到每日一问内容');
+            }
+            $this->code(200, 'ok', [
+                'title' => $askInfo['title'],
+                'content' => $askInfo['content'],
+                'released_at' => $askInfo['released_at']*1000,
             ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
