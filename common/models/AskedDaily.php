@@ -15,7 +15,8 @@ class AskedDaily extends ActiveRecord
     public function rules()
     {
         return [
-            [['title', 'content', 'released_at', 'created_at', 'updated_at'], 'required'],
+            [['title', 'created_at', 'updated_at', 'status', 'url'], 'required'],
+            [['content'], 'safe'],
         ];
     }
 
@@ -35,6 +36,6 @@ class AskedDaily extends ActiveRecord
      */
     public static function findLasted()
     {
-        return self::find()->where('released_at < :now', [':now' => time()])->orderBy('id desc')->one();
+        return self::find()->where(['status' => 0])->orderBy('id asc')->one();
     }
 }

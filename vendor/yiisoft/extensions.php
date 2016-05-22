@@ -57,4 +57,13 @@ return array (
       '@yii/faker' => $vendorDir . '/yiisoft/yii2-faker',
     ),
   ),
+    'moonland/yii2-phpexcel' =>
+        array (
+            'name' => 'moonland/yii2-phpexcel',
+            'version' => '1.1.0',
+            'alias' =>
+                array (
+                    '@moonland/phpexcel' => $vendorDir . '/moonland/yii2-phpexcel',
+                ),
+        ),
 );

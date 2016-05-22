@@ -1189,9 +1189,10 @@ class ApiController extends Controller
                 $this->code(450, '未找到每日一问内容');
             }
             $this->code(200, 'ok', [
+                'question_id' => $askInfo['id'],
                 'title' => $askInfo['title'],
                 'content' => $askInfo['content'],
-                'released_at' => $askInfo['released_at']*1000,
+                'url' => $askInfo['url'],
             ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
