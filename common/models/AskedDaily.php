@@ -38,4 +38,22 @@ class AskedDaily extends ActiveRecord
     {
         return self::find()->where(['status' => 0])->orderBy('id asc')->one();
     }
+
+    /**
+     * @param $data
+     * @param $id
+     * @return int
+     */
+    public static function mod($data, $id)
+    {
+        return self::updateAll($data, 'id = :id', [':id' => $id]);
+    }
+
+    /**
+     * @return array|null|ActiveRecord
+     */
+    public static function findNextOne()
+    {
+        return self::find()->where(['status' => 0])->orderBy('id asc')->one();
+    }
 }

@@ -48,4 +48,18 @@ class ConsoleController extends yii\console\Controller
             }
         }
     }
+
+    /**
+     * 每日一问问题替换
+     */
+    public function actionAskedQuestionMark()
+    {
+        $info = AskedDaily::findNextOne();
+        if(!$info) {
+            return false;
+        }
+        AskedDaily::mod([
+            'status' => 1,
+        ], $info['id']);
+    }
 }
