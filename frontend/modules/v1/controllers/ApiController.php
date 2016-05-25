@@ -1171,7 +1171,7 @@ class ApiController extends Controller
                 'latest_version' => $latestVersion,
                 'description' => $versionInfo['description'],
                 'updated_at' => $versionInfo['created_at'] * 1000,
-                'download_url' => '',
+                'download_url' => 'http://fir.im/huoshi',
             ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
