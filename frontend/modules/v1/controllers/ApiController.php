@@ -119,7 +119,7 @@ class ApiController extends Controller
                 'city_id' => $userInfo['city_id'],
                 'province_name' => $userInfo['province_name'],
                 'city_name' => $userInfo['city_name'],
-                'continuous_interces_days' => 0,    //连续代祷天数
+                'continuous_interces_days' => (int)$statistics['continuous_interces_days'],    //连续代祷天数
                 'continuous_days' => $readInfo ? $readInfo['continuous_days'] : 0,    //连续阅读天数
                 'total_minutes' => $readInfo ? $readInfo['total_minutes'] : 0,    //总阅读分钟数
                 'total_share_times' => isset($shareInfo['share_times']) ? $shareInfo['share_times'] : 0,    //分享统计次数
