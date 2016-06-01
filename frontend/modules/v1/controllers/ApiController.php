@@ -1191,7 +1191,7 @@ class ApiController extends Controller
             $this->code(200, 'ok', [
                 'question_id' => $askInfo['id'],
                 'title' => $askInfo['title'],
-                'content' => $askInfo['content'],
+                'content' => str_replace("\n", "\n\n", $askInfo['content']),
                 'url' => $askInfo['url'],
             ]);
         }catch (Exception $e) {
