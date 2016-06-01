@@ -74,4 +74,18 @@ class IntercessionJoin extends ActiveRecord
         $sql = sprintf($sql, $userId, $pageNo, ($startPage - 1) * $pageNo);
         return self::getDb()->createCommand($sql)->queryAll();
     }
+
+    /**
+     * 获取某人加入的总代祷次数
+     * @param $userId
+     * @return array|null|ActiveRecord
+     */
+    public static function findTotalWithUserId($userId)
+    {
+        $sql = "select count(id) as total from public.intercession_join where user_id = %d";
+        $sql = sprintf($sql, $userId);
+        $info = self::getDb()->createCommand($sql)->queryOne();
+        return $info['total'];
+    }
+
 }

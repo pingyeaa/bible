@@ -104,6 +104,9 @@ class ApiController extends Controller
             //上次代祷时间
             $statistics = IntercessionStatistics::findWithUserId($userInfo['id']);
 
+            //获取总参加代祷次数
+            $totalJoinIntercession = IntercessionJoin::findTotalWithUserId($userInfo['id']);
+
             //返回用户数据
             $this->code(200, 'ok', [
                 'user_id' => $userInfo['id'],
@@ -127,6 +130,7 @@ class ApiController extends Controller
                 'today_minutes' => (int)$readInfo['today_minutes'],
                 'last_read_long' => (int)$readInfo['last_read_long'],
                 'last_interces_time' => isset($statistics['last_interces_time']) ? (int)$statistics['last_interces_time'] : 0,
+                'total_join_intercession' => (int)$totalJoinIntercession,
             ]);
 
         }catch (yii\base\Exception $e){
