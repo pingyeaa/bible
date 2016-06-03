@@ -513,12 +513,12 @@ class ApiController extends Controller
      * @param $contacts
      * @internal param $phones
      */
-    public function actionContacts($user_id, $contacts)
+    public function actionContacts($user_id, $contacts = '')
     {
         try {
             $contactsArray = json_decode($contacts);
             if(!$contactsArray || !is_array($contactsArray)) {
-                $this->code(450, '参数格式错误');
+                $this->code(200, 'ok', []);
             }
 
             //区分用户类型：已注册、未注册
