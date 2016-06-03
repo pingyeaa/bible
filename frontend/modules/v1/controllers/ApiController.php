@@ -840,7 +840,7 @@ class ApiController extends Controller
                         'praise_number' => $info['praise_number'],
                         'created_at' => $info['created_at'] * 1000,
                         'is_praised' => $is ? 1 : 0,
-                        'gender' => $commentUserInfo['gender'],
+                        'gender' => (int)$commentUserInfo['gender'],
                     ];
                 }
             }
