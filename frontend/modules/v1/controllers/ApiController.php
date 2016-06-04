@@ -592,7 +592,7 @@ class ApiController extends Controller
      * @param null $updated_at 预计更新时间，时间戳
      * @param $position 定位位置
      */
-    public function actionIntercession($user_id, $content, $privacy, $updated_at = null, $position)
+    public function actionIntercession($user_id, $content, $privacy, $updated_at = null, $position = null)
     {
         try {
             if(empty($content)) {
