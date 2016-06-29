@@ -56,4 +56,9 @@ class AskedDaily extends ActiveRecord
     {
         return self::find()->where(['status' => 0])->orderBy('id asc')->one();
     }
+
+    public static function findById($id)
+    {
+        return self::find()->where(['id' => $id])->one();
+    }
 }

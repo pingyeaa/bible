@@ -1204,6 +1204,27 @@ class ApiController extends Controller
     }
 
     /**
+     * 每日一问详情
+     */
+    public function actionAskedDailyDetail($share_id)
+    {
+        try {
+            $askInfo = AskedDaily::findById($share_id);
+            if(!$askInfo) {
+                $this->code(450, '未找到每日一问内容');
+            }
+            $this->code(200, 'ok', [
+                'question_id' => $askInfo['id'],
+                'title' => $askInfo['title'],
+                'content' => str_replace("\n", "\n\n", $askInfo['content']),
+                'url' => $askInfo['url'],
+            ]);
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
      * 获取我的代祷列表
      * @param $user_id
      * @param $start_page
