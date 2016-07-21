@@ -66,4 +66,13 @@ return array (
                     '@moonland/phpexcel' => $vendorDir . '/moonland/yii2-phpexcel',
                 ),
         ),
+    'enochzg/yii2-jpush' =>
+        array (
+            'name' => 'enochzg/yii2-jpush',
+            'version' => '0.1.0',
+            'alias' =>
+                array (
+                    '@enochzg/jpush' => $vendorDir . '/enochzg/yii2-jpush/src/JPush/',
+                ),
+        ),
 );

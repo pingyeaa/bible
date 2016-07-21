@@ -1225,6 +1225,15 @@ class ApiController extends Controller
         }
     }
 
+    public function actionPush()
+    {
+        yii::$app->jPush->push()
+            ->setPlatform('all')
+            ->addAllAudience()
+            ->setNotificationAlert('Hi, JPush')
+            ->send();
+    }
+
     /**
      * 获取我的代祷列表
      * @param $user_id
