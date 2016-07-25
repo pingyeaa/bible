@@ -617,6 +617,28 @@ class ApiController extends Controller
             ]);
             if(!$is) throw new Exception(json_encode($intercession->getErrors()));
 
+            if($updated_at) {
+                try {
+                    //推送消息
+                    $payload = yii::$app->jPush->push()
+                        ->setPlatform('all')
+                        ->addAlias($user_id . '')
+                        ->setNotificationAlert('你发的代祷到了约定的更新时间，经常性的及时更新祷告事项的最新进展能让弟兄姊妹们更有信心。')
+                        ->build();
+
+                    //创建定时任务
+                    $response = yii::$app->jPush->schedule()->createSingleSchedule("代祷到了约定的更新时间", $payload, array("time"=>date('Y-m-d H:i:s', $updated_at/1000)));
+                    if(!$response) {
+                        $this->code(500, '定时推送任务创建失败');
+                    }
+
+                }catch (\Exception $e) {
+                    if(8 != $e->getCode()) {
+                        $this->code(500, $e->getMessage());
+                    }
+                }
+            }
+
             $this->code(200);
 
         }catch (Exception $e) {
@@ -1005,6 +1027,26 @@ class ApiController extends Controller
                 'updated_at' => time(),
             ]);
 
+            //获取代祷勇士
+            $intercessorsList = IntercessionJoin::getAllByIntercessionId($intercession_id);
+            $resultIntercessorsList = [];
+            foreach($intercessorsList as $intercessorsInfo) {
+                $resultIntercessorsList[] = $intercessorsInfo['id'] . '';
+            }
+
+            try {
+                //推送消息
+                yii::$app->jPush->push()
+                    ->setPlatform('all')
+                    ->addAlias($resultIntercessorsList)
+                    ->setNotificationAlert('你参与的代祷有了最新进展，赶紧去看看。')
+                    ->send();
+            }catch (\Exception $e) {
+                if(1011 != $e->getCode()) {
+                    $this->code(500, $e->getMessage());
+                }
+            }
+
             //返回
             $this->code(200);
         }catch (Exception $e) {
@@ -1072,6 +1114,12 @@ class ApiController extends Controller
     {
         $trans = yii::$app->db->beginTransaction();
         try {
+            //获取用户信息
+            $userInfo = User::findIdentity($user_id);
+            if(!$userInfo) {
+                $this->code(500, '登录用户不存在');
+            }
+
             //代祷是否存在
             $interInfo = Intercession::findByIntercessionId($intercession_id);
             if(!$interInfo) {
@@ -1094,6 +1142,20 @@ class ApiController extends Controller
             //递增代祷表评论数量
             $intercession = new Intercession();
             $intercession->increaseComments($intercession_id);
+
+            try {
+                //推送消息
+                yii::$app->jPush->push()
+                    ->setPlatform('all')
+                    ->addAlias($interInfo['user_id'] . '')
+                    ->setNotificationAlert($userInfo['nickname'] . '祝福了你的代祷事项。')
+                    ->send();
+            }catch (\Exception $e) {
+                if(1011 != $e->getCode()) {
+                    $trans->rollBack();
+                    $this->code(500, $e->getMessage());
+                }
+            }
 
             //返回
             $trans->commit();
