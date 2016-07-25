@@ -23,7 +23,10 @@ class Intercession extends ActiveRecord
     {
         $this->isNewRecord = true;
         $this->attributes = $data;
-        return $this->save();
+        if($this->save()) {
+            return $this->primaryKey();
+        }
+        return false;
     }
 
     public static function findAllByUserId($userId, $startPage = 1, $pageNo = 10)

@@ -623,7 +623,8 @@ class ApiController extends Controller
                     $payload = yii::$app->jPush->push()
                         ->setPlatform('all')
                         ->addAlias($user_id . '')
-                        ->setNotificationAlert('你发的代祷到了约定的更新时间，经常性的及时更新祷告事项的最新进展能让弟兄姊妹们更有信心。')
+                        ->addAndroidNotification('你发的代祷到了约定的更新时间，经常性的及时更新祷告事项的最新进展能让弟兄姊妹们更有信心。', null, 1, ['intercession_id' => $is])
+                        ->addIosNotification('你发的代祷到了约定的更新时间，经常性的及时更新祷告事项的最新进展能让弟兄姊妹们更有信心。', null, null, null, null, ['intercession_id' => $is])
                         ->build();
 
                     //创建定时任务
@@ -974,7 +975,8 @@ class ApiController extends Controller
                 yii::$app->jPush->push()
                     ->setPlatform('all')
                     ->addAlias($interInfo['user_id'] . '')
-                    ->setNotificationAlert($userInfo['nickname'] . '已经为你代祷，点击查看。')
+                    ->addAndroidNotification($userInfo['nickname'] . '已经为你代祷，点击查看。', null, 1, ['intercession_id' => $intercession_id])
+                    ->addIosNotification($userInfo['nickname'] . '已经为你代祷，点击查看。', null, null, null, null, ['intercession_id' => $intercession_id])
                     ->send();
             }catch (\Exception $e) {
                 if(1011 != $e->getCode()) {
@@ -1039,7 +1041,8 @@ class ApiController extends Controller
                 yii::$app->jPush->push()
                     ->setPlatform('all')
                     ->addAlias($resultIntercessorsList)
-                    ->setNotificationAlert('你参与的代祷有了最新进展，赶紧去看看。')
+                    ->addAndroidNotification('你参与的代祷有了最新进展，赶紧去看看。', null, 1, ['intercession_id' => $intercession_id])
+                    ->addIosNotification('你参与的代祷有了最新进展，赶紧去看看。', null, null, null, null, ['intercession_id' => $intercession_id])
                     ->send();
             }catch (\Exception $e) {
                 if(1011 != $e->getCode()) {
@@ -1148,7 +1151,8 @@ class ApiController extends Controller
                 yii::$app->jPush->push()
                     ->setPlatform('all')
                     ->addAlias($interInfo['user_id'] . '')
-                    ->setNotificationAlert($userInfo['nickname'] . '祝福了你的代祷事项。')
+                    ->addAndroidNotification($userInfo['nickname'] . '祝福了你的代祷事项。', null, 1, ['intercession_id' => $intercession_id])
+                    ->addIosNotification($userInfo['nickname'] . '祝福了你的代祷事项。', null, null, null, null, ['intercession_id' => $intercession_id])
                     ->send();
             }catch (\Exception $e) {
                 if(1011 != $e->getCode()) {
