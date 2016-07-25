@@ -895,22 +895,29 @@ class ApiController extends Controller
     public function actionIntercessionJoin($user_id, $intercession_id, $continuous_interces_days = 0, $last_interces_time = 0)
     {
         $trans = yii::$app->db->beginTransaction();
+
+        //查询是否已加入代祷
+        $info = IntercessionJoin::findByIntercessionIdAndIntercessorsId($intercession_id, $user_id);
+        if($info) {
+            $this->code(450, '已加入过该代祷');
+        }
+
+        //获取用户信息
+        $userInfo = User::findIdentity($user_id);
+        if(!$userInfo) {
+            $this->code(500, '登录用户不存在');
+        }
+
+        //查询是否有代祷内容
+        $interInfo = Intercession::findByIntercessionId($intercession_id);
+        if(!$interInfo) {
+            $this->code(451, '代祷内容不存在');
+        }
+
+        //查询该用户总共参与了多少次代祷
+        $total = IntercessionJoin::findTotalWithIntercessorsId($user_id);
+
         try {
-            //查询是否已加入代祷
-            $info = IntercessionJoin::findByIntercessionIdAndIntercessorsId($intercession_id, $user_id);
-            if($info) {
-                $this->code(450, '已加入过该代祷');
-            }
-
-            //查询是否有代祷内容
-            $interInfo = Intercession::findByIntercessionId($intercession_id);
-            if(!$interInfo) {
-                $this->code(451, '代祷内容不存在');
-            }
-
-            //查询该用户总共参与了多少次代祷
-            $total = IntercessionJoin::findTotalWithIntercessorsId($user_id);
-
             //加入代祷入库
             $intercessionJoin = new IntercessionJoin();
             $is = $intercessionJoin->add([
@@ -940,14 +947,29 @@ class ApiController extends Controller
                 'updated_at' => time(),
             ]);
 
+            try {
+                //推送消息
+                yii::$app->jPush->push()
+                    ->setPlatform('all')
+                    ->addAlias($interInfo['user_id'] . '')
+                    ->setNotificationAlert($userInfo['nickname'] . '已经为你代祷，点击查看。')
+                    ->send();
+            }catch (\Exception $e) {
+                if(1011 != $e->getCode()) {
+                    $trans->rollBack();
+                    $this->code(500, $e->getMessage());
+                }
+            }
+
             //返回
             $trans->commit();
+
             $this->code(200, '', [
                 'continuous_interces_days' => $continuous_interces_days,
                 'last_interces_time' => $last_interces_time,
                 'total_join_intercession' => $total,
             ]);
-        }catch (Exception $e) {
+        }catch (\Exception $e) {
             $trans->rollBack();
             $this->code(500, $e->getMessage());
         }
