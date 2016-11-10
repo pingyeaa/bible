@@ -516,13 +516,29 @@ class ApiController extends Controller
     public function actionContacts($user_id, $contacts = '')
     {
         try {
+            $data = [];
+
+            //如果`contacts`为空则直接返回好友列表
+            if(!$contacts) {
+                $friendList = Friends::findAllInfoByUserId($user_id);
+                if($friendList) {
+                    foreach($friendList as $friendInfo) {
+                        $data[] = [
+                            'phones' => $friendInfo['username'],
+                        ];
+                    }
+                }
+                $this->code(200, 'ok', $data);
+            }
+
             $contactsArray = json_decode($contacts);
             if(!$contactsArray || !is_array($contactsArray)) {
+                $data = [];
+
                 $this->code(200, 'ok', []);
             }
 
             //区分用户类型：已注册、未注册
-            $data = [];
             foreach($contactsArray as $obj) {
 
                 $phoneArray = explode(',', $obj->phones);
