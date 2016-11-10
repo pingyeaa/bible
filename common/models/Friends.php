@@ -106,4 +106,20 @@ class Friends extends ActiveRecord
         $sql = sprintf($sql, $userId, $depth);
         return self::getDb()->createCommand($sql)->queryAll();
     }
+
+    /**
+     * 查询某用户的朋友信息
+     * @param $userId
+     * @return array
+     */
+    public static function findAllInfoByUserId($userId)
+    {
+        $sql = "
+            SELECT * FROM public.friends a 
+            INNER JOIN public.user b ON a.friend_user_id = b.user_id 
+            WHERE a.user_id = %d
+        ";
+        $sql = sprintf($sql, $userId);
+        return self::getDb()->createCommand($sql)->queryAll();
+    }
 }
