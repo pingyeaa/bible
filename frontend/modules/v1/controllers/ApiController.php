@@ -524,7 +524,7 @@ class ApiController extends Controller
                 if($friendList) {
                     foreach($friendList as $friendInfo) {
                         $data[] = [
-                            'phones' => $friendInfo['username'],
+                            'phones' => md5($friendInfo['username']),
                         ];
                     }
                 }

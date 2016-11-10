@@ -116,7 +116,7 @@ class Friends extends ActiveRecord
     {
         $sql = "
             SELECT * FROM public.friends a 
-            INNER JOIN public.user b ON a.friend_user_id = b.user_id 
+            INNER JOIN public.user b ON a.friend_user_id = b.id 
             WHERE a.user_id = %d
         ";
         $sql = sprintf($sql, $userId);
