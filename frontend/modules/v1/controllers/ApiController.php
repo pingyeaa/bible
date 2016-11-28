@@ -14,6 +14,7 @@ use common\models\IntercessionJoin;
 use common\models\IntercessionStatistics;
 use common\models\IntercessionUpdate;
 use common\models\ReadingTime;
+use common\models\ReciteRecord;
 use common\models\ShareToday;
 use common\models\SyncContactsRecord;
 use React\Promise\FunctionRaceTest;
@@ -1331,6 +1332,39 @@ class ApiController extends Controller
                 'content' => str_replace("\n", "\n\n", $askInfo['content']),
                 'url' => $askInfo['url'],
             ]);
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 背诵统计记录
+     * @param $user_id integer 用户id
+     * @param $topic string 背诵主题
+     * @param $minutes integer 本次背诵消耗时间/分钟
+     * @param $chapter_no integer 背诵章节数
+     * @param $word_no integer 本次背诵字数
+     * @param $rate_of_progress integer 当前背诵进度
+     * @throws \Exception
+     */
+    public function actionReciteRecord($user_id, $topic, $minutes, $chapter_no, $word_no, $rate_of_progress)
+    {
+        try {
+            $reciteRecord = new ReciteRecord();
+            $is = $reciteRecord->add([
+                'user_id' => $user_id,
+                'topic' => $topic,
+                'minutes' => $minutes,
+                'chapter_no' => $chapter_no,
+                'word_no' => $word_no,
+                'rate_of_progress' => $rate_of_progress,
+                'recite_date' => date('Y-m-d'),
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+            if(!$is) {
+                throw new \Exception(json_encode($reciteRecord->getErrors()));
+            }
+            $this->code(200, '', []);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
         }
