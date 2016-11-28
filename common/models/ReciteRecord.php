@@ -29,4 +29,26 @@ class ReciteRecord extends ActiveRecord
         }
         return $is;
     }
+
+    /**
+     * 获取某人打卡天数
+     * @param $user_id
+     * @return array|bool
+     */
+    public function getClockDays($user_id)
+    {
+        $sql = "SELECT recite_date FROM public.recite_record WHERE user_id = 1 GROUP BY recite_date;";
+        $sql = sprintf($sql, $user_id);
+        return count(self::getDb()->createCommand($sql)->queryAll());
+    }
+
+    /**
+     * 获取最后一次记录信息
+     * @param $user_id
+     * @return array|bool
+     */
+    public function findLastRecord($user_id)
+    {
+        return $this->find()->where(['user_id' => $user_id])->orderBy('rc_id DESC')->one();
+    }
 }

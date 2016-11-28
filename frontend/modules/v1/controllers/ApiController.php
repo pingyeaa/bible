@@ -1358,13 +1358,41 @@ class ApiController extends Controller
                 'chapter_no' => $chapter_no,
                 'word_no' => $word_no,
                 'rate_of_progress' => $rate_of_progress,
-                'recite_date' => date('Y-m-d'),
+                'recite_date' => date('Ymd'),
                 'created_at' => time(),
             ]);
             if(!$is) {
                 throw new \Exception(json_encode($reciteRecord->getErrors()));
             }
             $this->code(200, '', []);
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 获取打卡天数及上次背诵信息
+     * @param $user_id
+     */
+    public function actionReciteInfo($user_id)
+    {
+        try {
+            $reciteRecord = new ReciteRecord();
+
+            //获取打卡天数
+            $clockDays = $reciteRecord->getClockDays($user_id);
+
+            //获取上次进度
+            $rateOfProgress = 0;
+            $record = $reciteRecord->findLastRecord($user_id);
+            if($record) {
+                $rateOfProgress = $record['rate_of_progress'];
+            }
+
+            $this->code(200, '', [
+                'clock_days' => $clockDays,
+                'rate_of_progress' => $rateOfProgress,
+            ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
         }
