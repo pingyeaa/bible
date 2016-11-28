@@ -1359,7 +1359,7 @@ class ApiController extends Controller
                 'word_no' => $word_no,
                 'rate_of_progress' => $rate_of_progress,
                 'recite_date' => date('Y-m-d'),
-                'created_at' => date('Y-m-d H:i:s'),
+                'created_at' => time(),
             ]);
             if(!$is) {
                 throw new \Exception(json_encode($reciteRecord->getErrors()));
