@@ -1402,6 +1402,36 @@ class ApiController extends Controller
     }
 
     /**
+     * 关注
+     * @param $user_id
+     * @param $target_user_id
+     */
+    public function actionFollow($user_id, $target_user_id)
+    {
+        try {
+            //被关注的人是`target_user_id`
+            //应该保存在`user_id`字段
+            //因为你关注别人你就是别人的朋友了
+            $friends = new Friends();
+            $friendInfo = Friends::findByFriendIdAndUserId($target_user_id, $user_id);
+            if(!$friendInfo) {
+                $is = $friends->add([
+                    'user_id' => $user_id,
+                    'friend_user_id' => $target_user_id,
+                    'created_at' => time(),
+                    'updated_at' => time(),
+                ]);
+                if(!$is) {
+                    throw new Exception(json_encode($friends->getErrors()));
+                }
+            }
+            $this->code(200, '', []);
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
      * 获取我的代祷列表
      * @param $user_id
      * @param $start_page
