@@ -1384,14 +1384,17 @@ class ApiController extends Controller
 
             //获取上次进度
             $rateOfProgress = 0;
+            $topic = '';
             $record = $reciteRecord->findLastRecord($user_id);
             if($record) {
                 $rateOfProgress = $record['rate_of_progress'];
+                $topic = $record['topic'];
             }
 
             $this->code(200, '', [
                 'clock_days' => $clockDays,
                 'rate_of_progress' => $rateOfProgress,
+                'topic' => $topic,
             ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());
