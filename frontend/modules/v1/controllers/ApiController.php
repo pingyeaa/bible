@@ -1432,6 +1432,43 @@ class ApiController extends Controller
     }
 
     /**
+     * 获取某用户资料
+     * @param $user_id integer 自己的用户id
+     * @param $target_user_id integer 被查资料的用户id
+     */
+    public function actionUserInfo($user_id, $target_user_id)
+    {
+        try{
+            //查看用户信息
+            $target_user_info = User::findIdentity($target_user_id);
+            if(!$target_user_info) {
+                $this->code(450, '该用户不存在');
+            }
+
+            //查看头像
+            $portrait_info = Portrait::findByUserId($target_user_id);
+
+            //查看用户读经时间
+            $read_info = ReadingTime::findByUserId($target_user_id);
+
+            //查看代祷加入次数
+            $intercession_join_times = IntercessionJoin::findTotalWithIntercessorsId($target_user_id);
+
+            //返回
+            $this->code(200, '', [
+                'nickname' => $target_user_info['nickname'],
+                'avatar' => !$portrait_info ? '' : yii::$app->qiniu->getDomain() . '/' .$portrait_info['portrait_name'],
+                'address' => $target_user_info['province_name'] . ($target_user_info['city_name'] ? '·' . $target_user_info['city_name'] : ''),
+                'believe_date' => date('Y/m/d', $target_user_info['believe_date']),
+                'total_minutes' => $read_info ? $read_info['total_minutes'] : 0,
+                'intercession_join_times' => $intercession_join_times ? $intercession_join_times : 0,
+            ]);
+        }catch (Exception $e) {
+            $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
      * 获取我的代祷列表
      * @param $user_id
      * @param $start_page
