@@ -1347,7 +1347,7 @@ class ApiController extends Controller
      * @param $rate_of_progress integer 当前背诵进度
      * @throws \Exception
      */
-    public function actionReciteRecord($user_id, $topic, $minutes, $chapter_no, $word_no, $rate_of_progress)
+    public function actionReciteRecord($user_id, $topic, $minutes, $chapter_no, $word_no, $rate_of_progress, $topic_id)
     {
         try {
             $reciteRecord = new ReciteRecord();
@@ -1360,6 +1360,7 @@ class ApiController extends Controller
                 'rate_of_progress' => $rate_of_progress,
                 'recite_date' => date('Ymd'),
                 'created_at' => time(),
+                'topic_id' => $topic_id,
             ]);
             if(!$is) {
                 throw new \Exception(json_encode($reciteRecord->getErrors()));
@@ -1389,12 +1390,14 @@ class ApiController extends Controller
             if($record) {
                 $rateOfProgress = $record['rate_of_progress'];
                 $topic = $record['topic'];
+                $topic_id = $record['topic_id'];
             }
 
             $this->code(200, '', [
                 'clock_days' => $clockDays,
                 'rate_of_progress' => $rateOfProgress,
                 'topic' => $topic,
+                'topic_id' => $topic_id,
             ]);
         }catch (Exception $e) {
             $this->code(500, $e->getMessage());

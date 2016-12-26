@@ -15,7 +15,7 @@ class ReciteRecord extends ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'topic', 'minutes', 'chapter_no', 'word_no', 'rate_of_progress', 'recite_date', 'created_at'], 'required'],
+            [['user_id', 'topic', 'minutes', 'chapter_no', 'word_no', 'rate_of_progress', 'recite_date', 'created_at', 'topic_id'], 'required'],
         ];
     }
 
