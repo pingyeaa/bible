@@ -1,6 +1,6 @@
 <?php
 
-namespace app\modules\v1\controllers;
+namespace app\controllers;
 
 use common\models\Scriptures;
 use common\models\Volume;
