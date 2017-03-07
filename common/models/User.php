@@ -253,4 +253,13 @@ class User extends ActiveRecord implements IdentityInterface
         $sql = sprintf($sql, $userId);
         return self::getDb()->createCommand($sql)->queryOne();
     }
+
+    /**
+     * @param $openid
+     * @return array|null|ActiveRecord
+     */
+    public static function getByWeChatOpenId($openid)
+    {
+        return self::find()->where(['openid' => $openid, 'platform_id' => 1])->one();
+    }
 }
