@@ -8,6 +8,10 @@ use yii\web\Controller;
 
 class WeChatController extends Controller
 {
+
+    protected $app_id = 'wxae67eaeeb26d373a';
+    protected $app_secret = 'ef596cee9d5cf302f80ebc1d4b79fd25';
+
     /**
      * 获取所有书卷
      */
@@ -68,6 +72,42 @@ class WeChatController extends Controller
         }catch (\Exception $e) {
             return $this->code(500, $e->getMessage());
         }
+    }
+
+    public function actionNewContent()
+    {
+        try {
+            $this->authorization('123');
+            return $this->code(200, '', []);
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
+    public function actionLogin($code)
+    {
+        session_start();
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://api.weixin.qq.com/sns/jscode2session?appid=".$this->app_id."&secret=".$this->app_secret."&js_code=$code&grant_type=authorization_code");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $data = curl_exec($ch);
+        curl_close($ch);
+        $result = \json_decode($data, true);
+        if(!isset($result['openid'])) {
+            return false;
+        }
+        $session_key = session_id();
+        $_SESSION[$session_key] = sprintf('%s,%s', $result['openid'], $result['session_key']);
+        return $this->code(200, '', ['session_key' => $session_key]);
+    }
+
+    /**
+     * 权限验证
+     * @param $code
+     */
+    protected function authorization($code)
+    {
+
     }
 
     /**
