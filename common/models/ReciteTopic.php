@@ -22,4 +22,9 @@ class ReciteTopic extends ActiveRecord
     {
         return self::find()->where(['topic_id' => $topic_id])->one();
     }
+
+    public static function findAllTopic()
+    {
+        return self::find()->orderBy('topic_id asc')->all();
+    }
 }

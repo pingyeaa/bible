@@ -150,6 +150,37 @@ class WeChatController extends Controller
         }
     }
 
+    /**
+     * 所有可背诵的主题列表
+     * @param $token string 令牌
+     */
+    public function actionTopicList($token)
+    {
+        try {
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
+
+            $data = [];
+            $all_topic = ReciteTopic::findAllTopic();
+            if(!$all_topic) {
+                return $this->code(451, '没有可背诵的主题');
+            }
+            foreach($all_topic as $topic_info) {
+                $data[] = [
+                    'topic_id' => $topic_info['topic_id'],
+                    'topic_name' => $topic_info['topic_name'],
+                    'content_number' => $topic_info['verse_total'],
+                ];
+            }
+
+            return $this->code(200, '', $data);
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
     public function actionLogin($code)
     {
         try {
