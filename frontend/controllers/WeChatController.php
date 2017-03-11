@@ -2,9 +2,13 @@
 
 namespace frontend\controllers;
 
+use common\models\ReciteContent;
+use common\models\ReciteRecord;
+use common\models\ReciteTopic;
 use common\models\Scriptures;
 use common\models\User;
 use common\models\Volume;
+use common\models\WechatReciteRecord;
 use yii\web\Controller;
 
 class WeChatController extends Controller
@@ -12,6 +16,8 @@ class WeChatController extends Controller
 
     protected $app_id = 'wxae67eaeeb26d373a';
     protected $app_secret = 'ef596cee9d5cf302f80ebc1d4b79fd25';
+    protected $user_id;
+    protected $open_id;
 
     public function beforeAction($action)
     {
@@ -81,7 +87,12 @@ class WeChatController extends Controller
         }
     }
 
-    public function actionNewContent($token)
+    /**
+     * 新背诵内容
+     * @param $token string 令牌
+     * @param $topic_id integer 背诵主题id
+     */
+    public function actionNewContent($token, $topic_id)
     {
         try {
             $openid = $this->authorization($token);
@@ -89,9 +100,51 @@ class WeChatController extends Controller
                 return $this->code(426, '`token`已过期');
             }
 
+            $topic_id = (int)$topic_id;
+            if(!$topic_id) {
+                return $this->code(400, '`topic_id`应该为数字');
+            }
 
+            //查找该用户最新背诵的内容
+            //如果未找到则返回`topic_id`为`1`,`content_id`为`1`的内容
+            //如果找到则在原来的`topic_id`/`content_id`基础上加`1`
+            //如果`content_id`加满了需要在`topic_id`上累加
+            $new_content = WechatReciteRecord::currentContent($this->user_id, $topic_id);
+            if(!$new_content) {
+                $topic_info = ReciteTopic::findById($topic_id);
+                if(!$topic_info) {
+                    return $this->code(400, '`topic_id`' . $topic_id . '不存在');
+                }
+                $content_info = ReciteContent::minContent($topic_id);
+                if(!$content_info) {
+                    return $this->code(400, '`topic_id`' . $topic_id . '下没有背诵内容');
+                }
+                $data = [
+                    'topic_id' => $topic_info['topic_id'],
+                    'topic_name' => $topic_info['topic_name'],
+                    'content_id' => $content_info['content_id'],
+                    'content' => trim($content_info['content']),
+                    'book_name' => $content_info['book_name'],
+                    'chapter_no' => $content_info['chapter_no'],
+                    'verse_no' => trim($content_info['verse_no']),
+                ];
+            }else {
+                $new_content_info = ReciteContent::newContent($new_content['topic_id'], $new_content['content_id']);
+                if(!$new_content_info) {
+                    return $this->code(451, '当前主题已经背诵完成');
+                }
+                $data = [
+                    'topic_id' => $new_content_info['topic_id'],
+                    'topic_name' => $new_content_info['topic_name'],
+                    'content_id' => $new_content_info['content_id'],
+                    'content' => trim($new_content_info['content']),
+                    'book_name' => $new_content_info['book_name'],
+                    'chapter_no' => $new_content_info['chapter_no'],
+                    'verse_no' => trim($new_content_info['verse_no']),
+                ];
+            }
 
-            return $this->code(200, '', []);
+            return $this->code(200, '', $data);
         }catch (\Exception $e) {
             return $this->code(500, $e->getMessage());
         }
@@ -149,6 +202,17 @@ class WeChatController extends Controller
         if(!isset($_SESSION[$token]) || empty($_SESSION[$token])) {
             return false;
         }
+
+        $open_id = explode(',', $_SESSION[$token])[0];
+
+        $user_info = User::getByWeChatOpenId($open_id);
+        if(!$user_info) {
+            return false;
+        }
+
+        $this->open_id = $open_id;
+        $this->user_id = $user_info['id'];
+
         return explode(',', $_SESSION[$token], true)[0];
     }
 
