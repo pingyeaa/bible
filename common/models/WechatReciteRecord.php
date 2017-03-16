@@ -14,7 +14,7 @@ class WechatReciteRecord extends ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'topic_id', 'created_at', 'content_id'], 'required'],
+            [['user_id', 'topic_id', 'created_at', 'content_id', 'topic_name'], 'required'],
             [['id'], 'safe'],
         ];
     }
@@ -58,5 +58,17 @@ class WechatReciteRecord extends ActiveRecord
             ORDER BY A.id ASC
         ";
         return self::getDb()->createCommand($sql)->queryAll();
+    }
+
+    /**
+     * 查找是否已背诵
+     * @param $user_id
+     * @param $topic_id
+     * @param $content_id
+     * @return array|null|ActiveRecord
+     */
+    public function findRecited($user_id, $topic_id, $content_id)
+    {
+        return $this->find()->where(['topic_id' => $topic_id, 'content_id' => $content_id, 'user_id' => $user_id])->one();
     }
 }

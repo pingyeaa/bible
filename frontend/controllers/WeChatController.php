@@ -267,6 +267,40 @@ class WeChatController extends Controller
         }
     }
 
+    public function actionCompleteRecite($token, $topic_id, $topic_name, $content_id)
+    {
+        try {
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
+
+            //检测该主题以及内容是否已经被忽略
+            $recite = new WechatReciteRecord();
+            $info = $recite->findRecited($this->user_id, $topic_id, $content_id);
+            if($info) {
+                return $this->code(451, '该经文已经背诵');
+            }
+
+            //如果没有被忽略就新增忽略内容
+            $is = $recite->add([
+                'user_id' => $this->user_id,
+                'topic_id' => $topic_id,
+                'topic_name' => $topic_name,
+                'content_id' => $content_id,
+                'created_at' => time(),
+            ]);
+            if(!$is) {
+                throw new \Exception(json_encode($recite->getErrors()));
+            }
+
+            return $this->code(200, '');
+
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
     /**
      * 忽略经文
      * @param $token
