@@ -8,7 +8,9 @@ use common\models\ReciteTopic;
 use common\models\Scriptures;
 use common\models\User;
 use common\models\Volume;
+use common\models\WechatIgnoreRecord;
 use common\models\WechatReciteRecord;
+use common\models\WechatReviewRecord;
 use yii\web\Controller;
 
 class WeChatController extends Controller
@@ -218,6 +220,87 @@ class WeChatController extends Controller
                 User::mod(['last_login_at' => time()], $user_info['id']);
             }
             return $this->code(200, '', ['token' => $token]);
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 今日复习内容
+     * @param $token
+     */
+    public function actionTodayReview($token)
+    {
+        try {
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
+
+            //定义需要复习的规律（天数）
+            $review_days = [1, 2, 4, 7, 15];
+
+            //查询今日需要复习的经文
+            //如果不存在则返回`451`状态码
+            $wechat_recite_record = new WechatReciteRecord();
+            $review_list = $wechat_recite_record->contentForReview($this->user_id, $review_days);
+            if(!$review_list) {
+                return $this->code(451, '暂无可复习经文');
+            }
+
+            $data = [];
+            $time = strtotime(date('Y-m-d 00:00:00'));
+            foreach($review_list as $review_info) {
+                $data[] = [
+                    'topic_id' => $review_info['topic_id'],
+                    'topic_name' => $review_info['topic_name'],
+                    'content_id' => $review_info['content_id'],
+                    'content' => trim($review_info['content']),
+                    'day' => (int)(($time - strtotime(date('Y-m-d 00:00:00', $review_info['created_at']))) / (24*60*60)),
+                ];
+            }
+
+            return $this->code(200, '', $data);
+
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 忽略经文
+     * @param $token
+     * @param $topic_id
+     * @param $content_id
+     */
+    public function actionIgnoreContent($token, $topic_id, $content_id)
+    {
+        try {
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
+
+            //检测该主题以及内容是否已经被忽略
+            $ignore = new WechatIgnoreRecord();
+            $info = $ignore->findIgnored($this->user_id, $topic_id, $content_id);
+            if($info) {
+                return $this->code(451, '该经文已被忽略');
+            }
+
+            //如果没有被忽略就新增忽略内容
+            $is = $ignore->add([
+                'user_id' => $this->user_id,
+                'topic_id' => $topic_id,
+                'content_id' => $content_id,
+                'created_at' => time(),
+            ]);
+            if(!$is) {
+                throw new \Exception(json_encode($ignore->getErrors()));
+            }
+
+            return $this->code(200, '');
+
         }catch (\Exception $e) {
             return $this->code(500, $e->getMessage());
         }

@@ -30,4 +30,33 @@ class WechatReciteRecord extends ActiveRecord
     {
         return self::find()->where(['user_id' => $user_id, 'topic_id' => $topic_id])->orderBy('id desc')->one();
     }
+
+    public function contentForReview($user_id, $review_days = [])
+    {
+        $where_time_sql = "";
+        if($review_days) {
+            foreach($review_days as $key => $day) {
+                $date = date('Y-m-d', strtotime("-$day days"));
+                $start_at = strtotime($date . ' 00:00:00');
+                $end_at = strtotime($date . ' 24:00:00');
+                if(0 == $key) {
+                    $where_time_sql .= sprintf(" (A.created_at BETWEEN '%s' AND '%s') ", $start_at, $end_at);
+                }else {
+                    $where_time_sql .= sprintf(" OR (A.created_at BETWEEN '%s' AND '%s') ", $start_at, $end_at);
+                }
+            }
+        }
+
+        $sql = "
+            SELECT A.topic_id, B.topic_name, A.content_id, C.content, A.created_at FROM public.wechat_recite_record A 
+            INNER JOIN public.recite_topic B ON A.topic_id = B.topic_id 
+            INNER JOIN public.recite_content C ON A.content_id = C.content_id 
+            WHERE A.user_id = $user_id AND ($where_time_sql) 
+            AND C.content_id NOT IN ( 
+                SELECT content_id FROM public.wechat_ignore_record WHERE user_id = $user_id 
+            )
+            ORDER BY A.id ASC
+        ";
+        return self::getDb()->createCommand($sql)->queryAll();
+    }
 }
