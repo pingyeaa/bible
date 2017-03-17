@@ -39,4 +39,15 @@ class ReciteContent extends ActiveRecord
         $sql = sprintf($sql, $topic_id, $content_id);
         return self::getDb()->createCommand($sql)->queryOne();
     }
+
+    /**
+     * 查询某主题下的所有内容数量
+     * @param $topic_id
+     * @return mixed
+     */
+    public static function countContent($topic_id)
+    {
+        $sql = "SELECT COUNT(content_id) AS total FROM public.recite_content WHERE topic_id = $topic_id";
+        return self::getDb()->createCommand($sql)->queryOne()['total'];
+    }
 }

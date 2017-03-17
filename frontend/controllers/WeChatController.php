@@ -341,6 +341,48 @@ class WeChatController extends Controller
     }
 
     /**
+     * 当前背诵进度
+     * 需要下发每个主题的背诵进度
+     * @param $token
+     */
+    public function actionReciteProgress($token)
+    {
+        try {
+            $data = [];
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
+
+            //查询所有可背诵的主题
+            $topic_list = ReciteTopic::findAllTopic();
+            foreach($topic_list as $topic_info) {
+                //查询该用户在此主题下的背诵进度
+                //查询用户忽略经文
+                //查询用户已背诵经文
+                //查询该主题所有经文
+                //（忽略经文+已背诵经文）/主题所有经文
+                $recited_number = WechatReciteRecord::countRecitedContent($this->user_id, $topic_info['topic_id']);
+                $ignored_number = WechatIgnoreRecord::countIgnoredContent($this->user_id, $topic_info['topic_id']);
+                $content_number = ReciteContent::countContent($topic_info['topic_id']);
+                $data[] = [
+                    'topic_id' => $recited_number,
+                    'topic_name' => $topic_info['topic_name'],
+                    'recited_number' => $recited_number,
+                    'ignored_number' => $ignored_number,
+                    'content_number' => $content_number,
+                    'percent' => round(($recited_number + $ignored_number) / $content_number * 100) . "%",
+                ];
+            }
+
+            return $this->code(200, '', $data);
+
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
      * 权限验证
      * @param $token
      * @return string openid
