@@ -83,4 +83,14 @@ class WechatReciteRecord extends ActiveRecord
         $sql = "SELECT COUNT(content_id) AS total FROM public.wechat_recite_record WHERE user_id = $user_id AND topic_id = $topic_id";
         return self::getDb()->createCommand($sql)->queryOne()['total'];
     }
+
+    /**
+     * 查询用户是否背诵过
+     * @param $user_id
+     * @return array|null|ActiveRecord
+     */
+    public static function findRecitedByUserId($user_id)
+    {
+        return self::find()->where(['user_id' => $user_id])->one();
+    }
 }

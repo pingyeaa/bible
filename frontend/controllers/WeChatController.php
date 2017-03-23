@@ -383,6 +383,35 @@ class WeChatController extends Controller
     }
 
     /**
+     * 查询是否背诵过
+     * @param $token
+     */
+    public function actionRecited($token)
+    {
+        try {
+            $data = [];
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
+
+            $info = WechatReciteRecord::findRecitedByUserId($this->user_id);
+            if(!$info) {
+                $data[] = [
+                    'recited' => 0,
+                ];
+            }
+
+            return $this->code(200, '', [
+                'recited' => 1,
+            ]);
+
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
      * 权限验证
      * @param $token
      * @return string openid
