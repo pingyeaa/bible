@@ -91,6 +91,6 @@ class WechatReciteRecord extends ActiveRecord
      */
     public static function findRecitedByUserId($user_id)
     {
-        return self::find()->where(['user_id' => $user_id])->one();
+        return self::find()->where(['user_id' => $user_id])->orderBy('id desc')->one();
     }
 }

@@ -170,6 +170,10 @@ class WeChatController extends Controller
                 return $this->code(451, '没有可背诵的主题');
             }
             foreach($all_topic as $topic_info) {
+
+                //查询用户是否背诵过该主题
+
+
                 $data[] = [
                     'topic_id' => $topic_info['topic_id'],
                     'topic_name' => $topic_info['topic_name'],
@@ -398,12 +402,12 @@ class WeChatController extends Controller
             $info = WechatReciteRecord::findRecitedByUserId($this->user_id);
             if(!$info) {
                 $data[] = [
-                    'recited' => 0,
+                    'topic_id' => 0,
                 ];
             }
 
             return $this->code(200, '', [
-                'recited' => 1,
+                'topic_id' => $info['topic_id'],
             ]);
 
         }catch (\Exception $e) {
