@@ -57,22 +57,31 @@ return array (
       '@yii/faker' => $vendorDir . '/yiisoft/yii2-faker',
     ),
   ),
-    'moonland/yii2-phpexcel' =>
-        array (
-            'name' => 'moonland/yii2-phpexcel',
-            'version' => '1.1.0',
-            'alias' =>
-                array (
-                    '@moonland/phpexcel' => $vendorDir . '/moonland/yii2-phpexcel',
-                ),
-        ),
-    'enochzg/yii2-jpush' =>
-        array (
-            'name' => 'enochzg/yii2-jpush',
-            'version' => '0.1.0',
-            'alias' =>
-                array (
-                    '@enochzg/jpush' => $vendorDir . '/enochzg/yii2-jpush/src/JPush/',
-                ),
-        ),
+  'moonland/yii2-phpexcel' => 
+  array (
+    'name' => 'moonland/yii2-phpexcel',
+    'version' => '1.1.0',
+    'alias' => 
+    array (
+      '@moonland/phpexcel' => $vendorDir . '/moonland/yii2-phpexcel',
+    ),
+  ),
+  'enochzg/yii2-jpush' => 
+  array (
+    'name' => 'enochzg/yii2-jpush',
+    'version' => '0.1.0',
+    'alias' => 
+    array (
+      '@enochzg/jpush' => $vendorDir . '/enochzg/yii2-jpush/src/JPush/',
+    ),
+  ),
+  'yiisoft/yii2-redis' => 
+  array (
+    'name' => 'yiisoft/yii2-redis',
+    'version' => '2.0.5.0',
+    'alias' => 
+    array (
+      '@yii/redis' => $vendorDir . '/yiisoft/yii2-redis',
+    ),
+  ),
 );

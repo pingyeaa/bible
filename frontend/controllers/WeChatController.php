@@ -204,10 +204,6 @@ class WeChatController extends Controller
                 return $this->code(400, '登录失败', ["https://api.weixin.qq.com/sns/jscode2session?appid=".$this->app_id."&secret=".$this->app_secret."&js_code=$code&grant_type=authorization_code"]);
             }
 
-            //生成`token`
-            $token = session_id();
-            $_SESSION[$token] = sprintf('%s,%s', $result['openid'], $result['session_key']);
-
             //将`openid`写入`用户表`
             $user_info = User::getByWeChatOpenId($result['openid']);
             if(!$user_info) {
@@ -224,9 +220,19 @@ class WeChatController extends Controller
                 if(!$is) {
                     throw new \Exception(\json_encode($user->getErrors()));
                 }
+                $user_id = $is;
             }else {
                 User::mod(['last_login_at' => time()], $user_info['id']);
+                $user_id = $user_info['id'];
             }
+
+            $token = \Yii::$app->redis->get('user_id_' . $user_id);
+            if(!$token) {
+                $token = uniqid();
+                \Yii::$app->redis->set('user_id_' . $user_id, $token, 'EX', 3600);
+                \Yii::$app->redis->set($token, $user_id, 'EX', 3600);
+            }
+
             return $this->code(200, '', ['token' => $token]);
         }catch (\Exception $e) {
             return $this->code(500, $e->getMessage());
@@ -426,21 +432,8 @@ class WeChatController extends Controller
      */
     protected function authorization($token)
     {
-        if(!isset($_SESSION[$token]) || empty($_SESSION[$token])) {
-            return false;
-        }
-
-        $open_id = explode(',', $_SESSION[$token])[0];
-
-        $user_info = User::getByWeChatOpenId($open_id);
-        if(!$user_info) {
-            return false;
-        }
-
-        $this->open_id = $open_id;
-        $this->user_id = $user_info['id'];
-
-        return explode(',', $_SESSION[$token], true)[0];
+        $this->user_id = \Yii::$app->redis->get($token);
+        return $this->user_id;
     }
 
     /**
