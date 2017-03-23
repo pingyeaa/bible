@@ -94,7 +94,7 @@ class WeChatController extends Controller
      * @param $token string 令牌
      * @param $topic_id integer 背诵主题id
      */
-    public function actionNewContent($token, $topic_id)
+    public function actionNewContent($token, $topic_id = 0)
     {
         try {
             $openid = $this->authorization($token);
@@ -104,7 +104,11 @@ class WeChatController extends Controller
 
             $topic_id = (int)$topic_id;
             if(!$topic_id) {
-                return $this->code(400, '`topic_id`应该为数字');
+                $info = WechatReciteRecord::findRecitedByUserId($this->user_id);
+                if(!$info) {
+                    return $this->code(452, '请选择需要背诵的主题');
+                }
+                $topic_id = $info['topic_id'];
             }
 
             //查找该用户最新背诵的内容
