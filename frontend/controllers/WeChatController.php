@@ -111,6 +111,9 @@ class WeChatController extends Controller
                 $topic_id = $info['topic_id'];
             }
 
+            //统计用户累积背诵天数
+            $total = ReciteRecord::countRecitedDays($this->user_id);
+
             //查找该用户最新背诵的内容
             //如果未找到则返回`topic_id`为`1`,`content_id`为`1`的内容
             //如果找到则在原来的`topic_id`/`content_id`基础上加`1`
@@ -133,6 +136,7 @@ class WeChatController extends Controller
                     'book_name' => $content_info['book_name'],
                     'chapter_no' => $content_info['chapter_no'],
                     'verse_no' => trim($content_info['verse_no']),
+                    'recited_days' => $total
                 ];
             }else {
                 $new_content_info = ReciteContent::newContent($new_content['topic_id'], $new_content['content_id']);
@@ -147,6 +151,7 @@ class WeChatController extends Controller
                     'book_name' => $new_content_info['book_name'],
                     'chapter_no' => $new_content_info['chapter_no'],
                     'verse_no' => trim($new_content_info['verse_no']),
+                    'recited_days' => $total
                 ];
             }
 

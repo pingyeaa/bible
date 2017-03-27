@@ -51,4 +51,16 @@ class ReciteRecord extends ActiveRecord
     {
         return $this->find()->where(['user_id' => $user_id])->orderBy('rc_id DESC')->one();
     }
+
+    /**
+     * 统计用户累积背诵天数
+     * @param $user_id
+     * @return int
+     */
+    public static function countRecitedDays($user_id)
+    {
+        $sql = "select count(to_char(to_timestamp(created_at),'yyyy-MM-dd')) as total from public.wechat_recite_record where user_id = %d group by to_char(to_timestamp(created_at),'yyyy-MM-dd')";
+        $sql = sprintf($sql, $user_id);
+        return self::getDb()->createCommand($sql)->queryOne()['total'];
+    }
 }
