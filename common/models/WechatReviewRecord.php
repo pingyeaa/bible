@@ -26,5 +26,15 @@ class WechatReviewRecord extends ActiveRecord
         return $this->save();
     }
 
-
+    /**
+     * 查找是否已复习
+     * @param $user_id
+     * @param $topic_id
+     * @param $content_id
+     * @return array|null|ActiveRecord
+     */
+    public function findReviewed($user_id, $topic_id, $content_id)
+    {
+        return $this->find()->where(['topic_id' => $topic_id, 'content_id' => $content_id, 'user_id' => $user_id])->one();
+    }
 }

@@ -431,6 +431,45 @@ class WeChatController extends Controller
     }
 
     /**
+     * 完成复习接口
+     * @param $token
+     * @param $topic_id
+     * @param $content_id
+     */
+    public function actionCompleteReview($token, $topic_id, $content_id)
+    {
+        try {
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
+
+            //检测该主题以及内容是否已经复习
+            $review = new WechatReviewRecord();
+            $info = $review->findReviewed($this->user_id, $topic_id, $content_id);
+            if($info) {
+                return $this->code(451, '该经文今日已经复习');
+            }
+
+            //如果没有复习就写入到数据库
+            $is = $review->add([
+                'user_id' => $this->user_id,
+                'topic_id' => $topic_id,
+                'content_id' => $content_id,
+                'created_at' => time(),
+            ]);
+            if(!$is) {
+                throw new \Exception(json_encode($review->getErrors()));
+            }
+
+            return $this->code(200, '');
+
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
      * 权限验证
      * @param $token
      * @return string openid
