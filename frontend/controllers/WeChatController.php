@@ -112,7 +112,7 @@ class WeChatController extends Controller
             }
 
             //统计用户累积背诵天数
-            $total = ReciteRecord::countRecitedDays($this->user_id);
+            $total = (int)ReciteRecord::countRecitedDays($this->user_id);
 
             //查找该用户最新背诵的内容
             //如果未找到则返回`topic_id`为`1`,`content_id`为`1`的内容
