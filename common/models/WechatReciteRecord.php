@@ -45,7 +45,6 @@ class WechatReciteRecord extends ActiveRecord
                     $where_time_sql .= sprintf(" OR (A.created_at BETWEEN '%s' AND '%s') ", $start_at, $end_at);
                 }
             }
-            return self::getDb()->createCommand($sql)->queryAll();
         }
 
         $sql = "
