@@ -61,6 +61,6 @@ class ReciteRecord extends ActiveRecord
     {
         $sql = "select count(to_char(to_timestamp(created_at),'yyyy-MM-dd')) as total from public.wechat_recite_record where user_id = %d group by to_char(to_timestamp(created_at),'yyyy-MM-dd')";
         $sql = sprintf($sql, $user_id);
-        return self::getDb()->createCommand($sql)->queryOne()['total'];
+        return count(self::getDb()->createCommand($sql)->queryAll());
     }
 }
