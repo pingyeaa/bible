@@ -54,9 +54,12 @@ class WechatReciteRecord extends ActiveRecord
             WHERE A.user_id = $user_id AND ($where_time_sql) 
             AND C.content_id NOT IN ( 
                 SELECT content_id FROM public.wechat_ignore_record WHERE user_id = $user_id 
+            ) AND C.content_id NOT IN (
+                SELECT content_id FROM public.wechat_review_record WHERE user_id = $user_id AND (created_at BETWEEN '%s' AND '%s') 
             )
             ORDER BY A.id ASC
         ";
+        $sql = sprintf($sql, strtotime(date('Y-m-d') . ' 00:00:00'), strtotime(date('Y-m-d') . ' 23:59:59'));
         return self::getDb()->createCommand($sql)->queryAll();
     }
 
