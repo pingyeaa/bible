@@ -154,7 +154,7 @@ class WeChatController extends Controller
                 $ignored_number = WechatIgnoreRecord::countIgnoredContent($this->user_id, $topic_id);
                 $content_number = ReciteContent::countContent($topic_id);
                 $percent = round(($recited_number + $ignored_number) / $content_number * 100) . "%";
-                
+
                 $data = [
                     'topic_id' => $new_content_info['topic_id'],
                     'topic_name' => $new_content_info['topic_name'],
@@ -288,6 +288,9 @@ class WeChatController extends Controller
                     'topic_name' => $review_info['topic_name'],
                     'content_id' => $review_info['content_id'],
                     'content' => trim($review_info['content']),
+                    'book_name' => trim($review_info['book_name']),
+                    'chapter_no' => trim($review_info['chapter_no']),
+                    'verse_no' => trim($review_info['verse_no']),
                     'day' => (int)(($time - strtotime(date('Y-m-d 00:00:00', $review_info['created_at']))) / (24*60*60)),
                 ];
             }

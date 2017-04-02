@@ -48,7 +48,7 @@ class WechatReciteRecord extends ActiveRecord
         }
 
         $sql = "
-            SELECT A.topic_id, B.topic_name, A.content_id, C.content, A.created_at FROM public.wechat_recite_record A 
+            SELECT A.topic_id, B.topic_name, A.content_id, C.content, A.created_at, C.chapter_no, C.verse_no, C.book_name FROM public.wechat_recite_record A 
             INNER JOIN public.recite_topic B ON A.topic_id = B.topic_id 
             INNER JOIN public.recite_content C ON A.content_id = C.content_id 
             WHERE A.user_id = $user_id AND ($where_time_sql) 
