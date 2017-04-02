@@ -136,13 +136,25 @@ class WeChatController extends Controller
                     'book_name' => $content_info['book_name'],
                     'chapter_no' => $content_info['chapter_no'],
                     'verse_no' => trim($content_info['verse_no']),
-                    'recited_days' => $total
+                    'recited_days' => $total,
+                    'percent' => "0%",
                 ];
             }else {
                 $new_content_info = ReciteContent::newContent($new_content['topic_id'], $new_content['content_id']);
                 if(!$new_content_info) {
                     return $this->code(451, '当前主题已经背诵完成');
                 }
+
+                //查询该用户在此主题下的背诵进度
+                //查询用户忽略经文
+                //查询用户已背诵经文
+                //查询该主题所有经文
+                //（忽略经文+已背诵经文）/主题所有经文
+                $recited_number = WechatReciteRecord::countRecitedContent($this->user_id, $topic_id);
+                $ignored_number = WechatIgnoreRecord::countIgnoredContent($this->user_id, $topic_id);
+                $content_number = ReciteContent::countContent($topic_id);
+                $percent = round(($recited_number + $ignored_number) / $content_number * 100) . "%";
+                
                 $data = [
                     'topic_id' => $new_content_info['topic_id'],
                     'topic_name' => $new_content_info['topic_name'],
@@ -151,7 +163,8 @@ class WeChatController extends Controller
                     'book_name' => $new_content_info['book_name'],
                     'chapter_no' => $new_content_info['chapter_no'],
                     'verse_no' => trim($new_content_info['verse_no']),
-                    'recited_days' => $total
+                    'recited_days' => $total,
+                    'percent' => $percent,
                 ];
             }
 
