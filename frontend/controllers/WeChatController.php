@@ -385,7 +385,7 @@ class WeChatController extends Controller
                 $ignored_number = WechatIgnoreRecord::countIgnoredContent($this->user_id, $topic_info['topic_id']);
                 $content_number = ReciteContent::countContent($topic_info['topic_id']);
                 $data[] = [
-                    'topic_id' => $recited_number,
+                    'topic_id' => $topic_info['topic_id'],
                     'topic_name' => $topic_info['topic_name'],
                     'recited_number' => $recited_number,
                     'ignored_number' => $ignored_number,
