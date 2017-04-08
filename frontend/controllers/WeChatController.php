@@ -140,7 +140,7 @@ class WeChatController extends Controller
                     'percent' => "0%",
                 ];
             }else {
-                $new_content_info = ReciteContent::newContent($new_content['topic_id'], $new_content['content_id']);
+                $new_content_info = ReciteContent::newContent($new_content['topic_id'], $new_content['content_id'], $this->user_id);
                 if(!$new_content_info) {
                     return $this->code(451, '当前主题已经背诵完成');
                 }

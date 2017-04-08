@@ -28,16 +28,16 @@ class ReciteContent extends ActiveRecord
         return self::find()->where(['topic_id' => $topic_id])->orderBy('content_id asc')->one();
     }
 
-    public static function newContent($topic_id, $content_id)
+    public static function newContent($topic_id, $content_id, $user_id)
     {
         $sql = "
             SELECT A.topic_id, A.content_id, B.topic_name, A.content, A.book_name, A.chapter_no, A.verse_no FROM public.recite_content A 
             INNER JOIN public.recite_topic B ON A.topic_id = B.topic_id 
-            LEFT JOIN public.wechat_ignore_record C ON A.content_id = C.content_id 
+            LEFT JOIN public.wechat_ignore_record C ON A.content_id = C.content_id AND C.user_id = %d 
             WHERE A.topic_id = %d AND A.content_id > %d AND C.topic_id IS NULL 
             ORDER BY A.content_id ASC LIMIT 1
         ";
-        $sql = sprintf($sql, $topic_id, $content_id);
+        $sql = sprintf($sql, $user_id, $topic_id, $content_id);
         return self::getDb()->createCommand($sql)->queryOne();
     }
 
