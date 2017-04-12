@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Friends;
 use common\models\ReciteContent;
 use common\models\ReciteRecord;
 use common\models\ReciteTopic;
@@ -251,7 +252,7 @@ class WeChatController extends Controller
                 \Yii::$app->redis->set($token, $user_id, 'EX', 3600);
             }
 
-            return $this->code(200, '', ['token' => $token, 'invitation_code' => sha1($user_id)]);
+            return $this->code(200, '', ['token' => $token, 'invitation_code' => $user_id]);
         }catch (\Exception $e) {
             return $this->code(500, $e->getMessage());
         }
@@ -477,6 +478,48 @@ class WeChatController extends Controller
             if(!$is) {
                 throw new \Exception(json_encode($review->getErrors()));
             }
+
+            return $this->code(200, '');
+
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 完成复习接口
+     * @param $token
+     * @param $invitation_code string 邀请码
+     */
+    public function actionInvitation($token, $invitation_code)
+    {
+        try {
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
+
+            if($this->user_id == $invitation_code) {
+                return $this->code(200, '不能关注自己，已忽略');
+            }
+
+            //被关注的人是`target_user_id`
+            //应该保存在`user_id`字段
+            //因为你关注别人你就是别人的朋友了
+            $friends = new Friends();
+            $friendInfo = Friends::findByFriendIdAndUserId((int)$invitation_code, $this->user_id);
+            if(!$friendInfo) {
+                $is = $friends->add([
+                    'user_id' => $this->user_id,
+                    'friend_user_id' => $invitation_code,
+                    'created_at' => time(),
+                    'updated_at' => time(),
+                ]);
+                if(!$is) {
+                    throw new \Exception(json_encode($friends->getErrors()));
+                }
+            }
+            $this->code(200, '', []);
 
             return $this->code(200, '');
 
