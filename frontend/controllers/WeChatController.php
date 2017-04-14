@@ -139,6 +139,7 @@ class WeChatController extends Controller
                     'verse_no' => trim($content_info['verse_no']),
                     'recited_days' => $total,
                     'percent' => "0%",
+                    'annotation' => '暂无注解',
                 ];
             }else {
                 $new_content_info = ReciteContent::newContent($new_content['topic_id'], $new_content['content_id'], $this->user_id);
@@ -166,6 +167,7 @@ class WeChatController extends Controller
                     'verse_no' => trim($new_content_info['verse_no']),
                     'recited_days' => $total,
                     'percent' => $percent,
+                    'annotation' => '暂无注解',
                 ];
             }
 
