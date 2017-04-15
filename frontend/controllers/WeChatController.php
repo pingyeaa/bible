@@ -134,7 +134,7 @@ class WeChatController extends Controller
                 //查询注释
                 $annotation_string = '';
                 $annotation = Annotation::findByBookId($content_info['book_id'], $content_info['chapter_no'], trim($content_info['verse_no']));
-                if(!$annotation) {
+                if($annotation) {
                     $annotation_string = trim($annotation['noteText']);
                 }
 
@@ -169,7 +169,7 @@ class WeChatController extends Controller
                 //查询注释
                 $annotation_string = '';
                 $annotation = Annotation::findByBookId($new_content_info['book_id'], $new_content_info['chapter_no'], trim($new_content_info['verse_no']));
-                if(!$annotation) {
+                if($annotation) {
                     $annotation_string = trim($annotation['noteText']);
                 }
 
@@ -306,7 +306,7 @@ class WeChatController extends Controller
                 //查询注释
                 $annotation_string = '';
                 $annotation = Annotation::findByBookId($review_info['book_id'], $review_info['chapter_no'], trim($review_info['verse_no']));
-                if(!$annotation) {
+                if($annotation) {
                     $annotation_string = trim($annotation['noteText']);
                 }
 
