@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Annotation;
 use common\models\Friends;
 use common\models\ReciteContent;
 use common\models\ReciteRecord;
@@ -129,6 +130,14 @@ class WeChatController extends Controller
                 if(!$content_info) {
                     return $this->code(400, '`topic_id`' . $topic_id . '下没有背诵内容');
                 }
+
+                //查询注释
+                $annotation_string = '';
+                $annotation = Annotation::findByBookId($content_info['book_id'], $content_info['chapter_no'], trim($content_info['verse_no']));
+                if(!$annotation) {
+                    $annotation_string = trim($annotation['noteText']);
+                }
+
                 $data = [
                     'topic_id' => $topic_info['topic_id'],
                     'topic_name' => $topic_info['topic_name'],
@@ -139,7 +148,7 @@ class WeChatController extends Controller
                     'verse_no' => trim($content_info['verse_no']),
                     'recited_days' => $total,
                     'percent' => "0%",
-                    'annotation' => '暂无注解',
+                    'annotation' => $annotation_string,
                 ];
             }else {
                 $new_content_info = ReciteContent::newContent($new_content['topic_id'], $new_content['content_id'], $this->user_id);
@@ -157,6 +166,13 @@ class WeChatController extends Controller
                 $content_number = ReciteContent::countContent($topic_id);
                 $percent = round(($recited_number + $ignored_number) / $content_number * 100) . "%";
 
+                //查询注释
+                $annotation_string = '';
+                $annotation = Annotation::findByBookId($new_content_info['book_id'], $new_content_info['chapter_no'], trim($new_content_info['verse_no']));
+                if(!$annotation) {
+                    $annotation_string = trim($annotation['noteText']);
+                }
+
                 $data = [
                     'topic_id' => $new_content_info['topic_id'],
                     'topic_name' => $new_content_info['topic_name'],
@@ -167,7 +183,7 @@ class WeChatController extends Controller
                     'verse_no' => trim($new_content_info['verse_no']),
                     'recited_days' => $total,
                     'percent' => $percent,
-                    'annotation' => '暂无注解',
+                    'annotation' => $annotation_string,
                 ];
             }
 
@@ -286,6 +302,14 @@ class WeChatController extends Controller
             $data = [];
             $time = strtotime(date('Y-m-d 00:00:00'));
             foreach($review_list as $review_info) {
+
+                //查询注释
+                $annotation_string = '';
+                $annotation = Annotation::findByBookId($review_info['book_id'], $review_info['chapter_no'], trim($review_info['verse_no']));
+                if(!$annotation) {
+                    $annotation_string = trim($annotation['noteText']);
+                }
+
                 $data[] = [
                     'topic_id' => $review_info['topic_id'],
                     'topic_name' => $review_info['topic_name'],
@@ -295,7 +319,7 @@ class WeChatController extends Controller
                     'chapter_no' => trim($review_info['chapter_no']),
                     'verse_no' => trim($review_info['verse_no']),
                     'day' => (int)(($time - strtotime(date('Y-m-d 00:00:00', $review_info['created_at']))) / (24*60*60)),
-                    'annotation' => '暂无注释',
+                    'annotation' => $annotation_string,
                 ];
             }
 
