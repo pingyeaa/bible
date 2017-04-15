@@ -295,6 +295,7 @@ class WeChatController extends Controller
                     'chapter_no' => trim($review_info['chapter_no']),
                     'verse_no' => trim($review_info['verse_no']),
                     'day' => (int)(($time - strtotime(date('Y-m-d 00:00:00', $review_info['created_at']))) / (24*60*60)),
+                    'annotation' => '暂无注释',
                 ];
             }
 
