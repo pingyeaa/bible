@@ -592,7 +592,6 @@ class WeChatController extends Controller
                         'book_name' => $content_info['book_name'],
                         'chapter_no' => $content_info['chapter_no'],
                         'verse_no' => $content_info['verse_no'],
-                        'time' => date('Y-m-d H:i:s', $info['created_at']),
                         'recitation_times' => $review_info ? $review_info['times'] + 1 : 1,
                     ];
                 }
@@ -639,7 +638,6 @@ class WeChatController extends Controller
                         'book_name' => $content_info['book_name'],
                         'chapter_no' => $content_info['chapter_no'],
                         'verse_no' => $content_info['verse_no'],
-                        'time' => date('Y-m-d H:i:s', $info['created_at']),
                         'recitation_times' => $review_info ? $review_info['times'] + 1 : 1,
                     ];
                 }
