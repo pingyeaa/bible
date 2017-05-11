@@ -352,6 +352,7 @@ class WeChatController extends Controller
                 'topic_name' => $topic_name,
                 'content_id' => $content_id,
                 'created_at' => time(),
+                'times' => 1,
             ]);
             if(!$is) {
                 throw new \Exception(json_encode($recite->getErrors()));
@@ -492,7 +493,8 @@ class WeChatController extends Controller
             $review = new WechatReviewRecord();
             $info = $review->findReviewed($this->user_id, $topic_id, $content_id);
             if($info) {
-                return $this->code(451, '该经文今日已经复习');
+                $review->autoIncreaseTimes($content_id);
+                return $this->code(200, '已增加一次复习次数');
             }
 
             //如果没有复习就写入到数据库
@@ -501,6 +503,7 @@ class WeChatController extends Controller
                 'topic_id' => $topic_id,
                 'content_id' => $content_id,
                 'created_at' => time(),
+                'times' => 1,
             ]);
             if(!$is) {
                 throw new \Exception(json_encode($review->getErrors()));
@@ -549,6 +552,100 @@ class WeChatController extends Controller
             $this->code(200, '', []);
 
             return $this->code(200, '');
+
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 今日背诵过的经文
+     * @param $token
+     * @param $page_no
+     * @param $limit
+     */
+    public function actionRecitedToday($token, $page_no, $limit)
+    {
+        try {
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
+
+            $data = [];
+            $list = WechatReciteRecord::todayRecited($this->user_id, $page_no, $limit);
+            if($list) {
+                foreach($list as $info) {
+
+                    //查询经文详细信息
+                    $content_info = ReciteContent::findById($info['topic_id'], $info['content_id']);
+
+                    //查询复习次数
+                    $wechat_review_record = new WechatReviewRecord();
+                    $review_info = $wechat_review_record->findReviewed($this->user_id, $info['topic_id'], $info['content_id']);
+
+                    $data[] = [
+                        'topic_id' => $info['topic_id'],
+                        'topic_name' => $info['topic_name'],
+                        'content_id' => $info['content_id'],
+                        'content' => $content_info['content'],
+                        'book_name' => $content_info['book_name'],
+                        'chapter_no' => $content_info['chapter_no'],
+                        'verse_no' => $content_info['verse_no'],
+                        'time' => date('Y-m-d H:i:s', $info['created_at']),
+                        'recitation_times' => $review_info ? $review_info['times'] + 1 : 1,
+                    ];
+                }
+            }
+
+            return $this->code(200, '', $data);
+
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 已背诵的历史经文
+     * @param $token
+     * @param $page_no
+     * @param $limit
+     */
+    public function actionRecitedBefore($token, $page_no, $limit)
+    {
+        try {
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
+
+            $data = [];
+            $list = WechatReciteRecord::historyRecited($this->user_id, $page_no, $limit);
+            if($list) {
+                foreach($list as $info) {
+
+                    //查询经文详细信息
+                    $content_info = ReciteContent::findById($info['topic_id'], $info['content_id']);
+
+                    //查询复习次数
+                    $wechat_review_record = new WechatReviewRecord();
+                    $review_info = $wechat_review_record->findReviewed($this->user_id, $info['topic_id'], $info['content_id']);
+
+                    $data[] = [
+                        'topic_id' => $info['topic_id'],
+                        'topic_name' => $info['topic_name'],
+                        'content_id' => $info['content_id'],
+                        'content' => $content_info['content'],
+                        'book_name' => $content_info['book_name'],
+                        'chapter_no' => $content_info['chapter_no'],
+                        'verse_no' => $content_info['verse_no'],
+                        'time' => date('Y-m-d H:i:s', $info['created_at']),
+                        'recitation_times' => $review_info ? $review_info['times'] + 1 : 1,
+                    ];
+                }
+            }
+
+            return $this->code(200, '', $data);
 
         }catch (\Exception $e) {
             return $this->code(500, $e->getMessage());

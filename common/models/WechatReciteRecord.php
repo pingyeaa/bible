@@ -96,4 +96,33 @@ class WechatReciteRecord extends ActiveRecord
     {
         return self::find()->where(['user_id' => $user_id])->orderBy('id desc')->one();
     }
+
+    /**
+     * 今日已背诵内容
+     * @param $user_id
+     * @param $page_no
+     * @param $limit
+     * @return array|null|ActiveRecord
+     */
+    public static function todayRecited($user_id, $page_no, $limit)
+    {
+        $date = date('Y-m-d');
+        $begin_time = strtotime($date . ' 00:00:00');
+        $end_time = strtotime($date . ' 23:59:59');
+        return self::find()->where('user_id = :user_id AND created_at BETWEEN :start_time AND :end_time', ['user_id' => $user_id, 'start_time' => $begin_time, 'end_time' => $end_time])->offset(($page_no - 1)*$limit)->limit($limit)->orderBy('id desc')->all();
+    }
+
+    /**
+     * 历史已背诵内容
+     * @param $user_id
+     * @param $page_no
+     * @param $limit
+     * @return array|null|ActiveRecord
+     */
+    public static function historyRecited($user_id, $page_no, $limit)
+    {
+        $date = date('Y-m-d');
+        $end_time = strtotime($date . ' 23:59:59');
+        return self::find()->where('user_id = :user_id AND created_at < :end_time', ['user_id' => $user_id, 'end_time' => $end_time])->orderBy('id desc')->offset(($page_no - 1)*$limit)->limit($limit)->all();
+    }
 }

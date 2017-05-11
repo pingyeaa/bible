@@ -14,7 +14,7 @@ class WechatReviewRecord extends ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'topic_id', 'created_at', 'content_id'], 'required'],
+            [['user_id', 'topic_id', 'created_at', 'content_id', 'times'], 'required'],
             [['id'], 'safe'],
         ];
     }
@@ -36,5 +36,11 @@ class WechatReviewRecord extends ActiveRecord
     public function findReviewed($user_id, $topic_id, $content_id)
     {
         return $this->find()->where(['topic_id' => $topic_id, 'content_id' => $content_id, 'user_id' => $user_id])->one();
+    }
+
+    public function autoIncreaseTimes($content_id)
+    {
+        $sql = "UPDATE public.wechat_review_record SET times = times + 1 WHERE content_id = " . $content_id;
+        return self::getDb()->createCommand($sql)->execute();
     }
 }
