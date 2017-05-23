@@ -31,7 +31,7 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return [
             [['created_at', 'nation_code', 'username', 'password'], 'required'],
-            [['nickname', 'gender', 'birthday', 'believe_date', 'status', 'last_login_at', 'province_name', 'city_name', 'province_id', 'city_id', 'openid', 'platform_id'], 'safe'],
+            [['nickname', 'gender', 'birthday', 'believe_date', 'status', 'last_login_at', 'province_name', 'city_name', 'province_id', 'city_id', 'openid', 'platform_id', 'union_id'], 'safe'],
         ];
     }
 

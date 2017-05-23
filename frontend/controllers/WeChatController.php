@@ -20,6 +20,8 @@ class WeChatController extends Controller
 
     protected $app_id = 'wxae67eaeeb26d373a';
     protected $app_secret = 'ef596cee9d5cf302f80ebc1d4b79fd25';
+    protected $gz_app_id = 'wx48681fe10962eb3b';
+    protected $gz_app_secret = 'f8bffcacc135dc1a17521b943204a0fb';
     protected $user_id;
     protected $open_id;
 
@@ -228,7 +230,12 @@ class WeChatController extends Controller
         }
     }
 
-    public function actionLogin($code)
+    /**
+     * @param $code
+     * @param string $union_id
+     * @return mixed
+     */
+    public function actionLogin($code, $union_id = '')
     {
         try {
             $ch = curl_init();
@@ -245,7 +252,7 @@ class WeChatController extends Controller
             $user_info = User::getByWeChatOpenId($result['openid']);
             if(!$user_info) {
                 $user = new User();
-                $is = $user->add([
+                $data = [
                     'username' => uniqid(),
                     'password' => uniqid(),
                     'created_at' => time(),
@@ -253,13 +260,17 @@ class WeChatController extends Controller
                     'openid' => $result['openid'],
                     'platform_id' => 1,
                     'nation_code' => 86,
-                ]);
+                ];
+                if($union_id) { $data['union_id'] = $union_id; }
+                $is = $user->add($data);
                 if(!$is) {
                     throw new \Exception(\json_encode($user->getErrors()));
                 }
                 $user_id = $is;
             }else {
-                User::mod(['last_login_at' => time()], $user_info['id']);
+                $data = ['last_login_at' => time()];
+                if($union_id) { $data['union_id'] = $union_id; }
+                User::mod($data, $user_info['id']);
                 $user_id = $user_info['id'];
             }
 
