@@ -232,10 +232,10 @@ class WeChatController extends Controller
 
     /**
      * @param $code
-     * @param string $union_id
+     * @param string $encrypted_data
      * @return mixed
      */
-    public function actionLogin($code, $union_id = '')
+    public function actionLogin($code, $encrypted_data = '')
     {
         try {
             $ch = curl_init();
@@ -246,6 +246,20 @@ class WeChatController extends Controller
             $result = \json_decode($data, true);
             if(!isset($result['openid'])) {
                 return $this->code(400, '登录失败', ["https://api.weixin.qq.com/sns/jscode2session?appid=".$this->app_id."&secret=".$this->app_secret."&js_code=$code&grant_type=authorization_code"]);
+            }
+
+            //解密出`union_id`
+            $union_id = '';
+            if($encrypted_data) {
+                include_once __DIR__."/../components/wechat/wxBizDataCrypt.php";
+                $iv = 'r7BXXKkLb8qrSNn05n0qiA==';
+                $pc = new \WXBizDataCrypt($this->app_id, $result['session_key']);
+                $errCode = $pc->decryptData($encrypted_data, $iv, $data);
+                if ($errCode == 0) {
+                    $union_id = json_decode($data, true)['unionId'];
+                } else {
+                    throw new \Exception('`encrypt_data`解析失败' . $errCode);
+                }
             }
 
             //将`openid`写入`用户表`
