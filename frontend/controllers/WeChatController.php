@@ -233,9 +233,10 @@ class WeChatController extends Controller
     /**
      * @param $code
      * @param string $encrypted_data
+     * @param string $iv
      * @return mixed
      */
-    public function actionLogin($code, $encrypted_data = '')
+    public function actionLogin($code, $encrypted_data = '', $iv = '')
     {
         try {
             $ch = curl_init();
@@ -250,9 +251,10 @@ class WeChatController extends Controller
 
             //解密出`union_id`
             $union_id = '';
-            if($encrypted_data) {
+            if($encrypted_data && $iv) {
+                $iv = str_replace(' ', '+', urldecode($iv));
+                $encrypted_data = str_replace(' ', '+', urldecode($encrypted_data));
                 include_once __DIR__."/../components/wechat/wxBizDataCrypt.php";
-                $iv = 'r7BXXKkLb8qrSNn05n0qiA==';
                 $pc = new \WXBizDataCrypt($this->app_id, $result['session_key']);
                 $errCode = $pc->decryptData($encrypted_data, $iv, $data);
                 if ($errCode == 0) {
