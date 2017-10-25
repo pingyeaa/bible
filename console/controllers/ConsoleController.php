@@ -4,6 +4,8 @@ namespace console\controllers;
 
 use common\models\AskedDaily;
 use common\models\NickList;
+use common\models\Scriptures;
+use common\models\Volume;
 use yii;
 
 class ConsoleController extends yii\console\Controller
@@ -61,5 +63,25 @@ class ConsoleController extends yii\console\Controller
         AskedDaily::mod([
             'status' => 1,
         ], $info['id']);
+    }
+
+    /**
+     * 导出音频所需经文文字内容
+     */
+    public function actionDump()
+    {
+        $volume_list = Volume::find()->orderBy('id asc')->all();
+        foreach($volume_list as $volume) {
+            $volume_path = '/tmp/bible/' . $volume['full_name'];
+            if(!realpath($volume_path)) {
+                mkdir($volume_path);
+            }
+            $scriptures_list = Scriptures::find()->where(['volume_id' => $volume['id']])->orderBy('chapter_no asc, verse_no asc')->all();
+            foreach($scriptures_list as $scripture) {
+                $scripture_file = $volume_path . str_pad($scripture['chapter_no'], 2, '0', STR_PAD_LEFT) . '.txt';
+                echo sprintf('卷：%s 章：%s 节：%s', $volume['full_name'], $scripture['chapter_no'], $scripture['verse_no']);
+                file_put_contents($scripture_file, sprintf("%d:%d %s\n", $scripture['chapter_no'], $scripture['verse_no'], $scripture['lection']), FILE_APPEND);
+            }
+        }
     }
 }
