@@ -678,6 +678,29 @@ class WeChatController extends Controller
     }
 
     /**
+     * 圣经音频信息获取
+     */
+    public function actionBibleAudio($token, $volume_id, $chapter_no)
+    {
+        try {
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
+
+            $data = [
+                'path' => '/path/以弗所书第1章.mp3',
+                'second' => [0, 25, 60, 102]
+            ];
+
+            return $this->code(200, '', $data);
+
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
      * 权限验证
      * @param $token
      * @return string openid
