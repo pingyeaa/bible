@@ -689,7 +689,7 @@ class WeChatController extends Controller
             }
 
             $data = [
-                'path' => '/path/以弗所书第1章.mp3',
+//                'path' => '/path/以弗所书第1章.mp3',
                 'second' => [0, 25, 60, 102]
             ];
 
