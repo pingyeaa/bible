@@ -22,7 +22,7 @@ class Volume extends ActiveRecord
         $sql = "
             select a.full_name, b.volume_id, b.chapter_no from public.volume a 
             inner join public.scriptures b on a.id = b.volume_id 
-            group by a.full_name, b.volume_id, b.chapter_no order by a.full_name, b.volume_id, b.chapter_no asc;
+            group by b.volume_id, b.chapter_no, a.full_name order by b.volume_id, b.chapter_no, a.full_name asc;
         ";
         return self::getDb()->createCommand($sql)->queryAll();
     }

@@ -88,7 +88,9 @@ class ConsoleController extends yii\console\Controller
     {
         $volume_list = Volume::volumeList();
         foreach($volume_list as $volume_info) {
-            mkdir('/mydata/audio/' . $volume_info['volume_id']);
+            if(!realpath('/mydata/audio/' . $volume_info['volume_id'])) {
+                mkdir('/mydata/audio/' . $volume_info['volume_id']);
+            }
             $file_name = sprintf('/mydata/audio/%s%s.mp3', $volume_info['full_name'], str_pad($volume_info['volume_id'], 2, 0, STR_PAD_LEFT));
             if(!is_file($file_name)) {
                 continue;
