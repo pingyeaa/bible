@@ -91,16 +91,16 @@ class ConsoleController extends yii\console\Controller
             if(!realpath('/mydata/audio/' . $volume_info['volume_id'])) {
                 mkdir('/mydata/audio/' . $volume_info['volume_id']);
             }
-            $file_name = sprintf('/mydata/audio/%s%s.mp3', $volume_info['full_name'], str_pad($volume_info['volume_id'], 2, 0, STR_PAD_LEFT));
-            echo '开始处理文件' . $file_name;
+            $file_name = sprintf('/mydata/audio/%s第%s章.mp3', $volume_info['full_name'], $volume_info['volume_id']);
+            echo '开始处理文件' . $file_name . "\n";
             if(!is_file($file_name)) {
                 continue;
             }
             $is = rename($file_name, sprintf('/mydata/audio/%d/%s.mp3', $volume_info['volume_id'], $volume_info['chapter_no']));
             if($is) {
-                echo '文件`'.$file_name.'`移动成功';
+                echo '文件`'.$file_name.'`移动成功' . "\n";
             }else {
-                echo '文件`'.$file_name.'`移动失败';
+                echo '文件`'.$file_name.'`移动失败' . "\n";
             }
         }
     }
