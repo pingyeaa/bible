@@ -91,7 +91,7 @@ class ConsoleController extends yii\console\Controller
             if(!realpath('/mydata/audio/' . $volume_info['volume_id'])) {
                 mkdir('/mydata/audio/' . $volume_info['volume_id']);
             }
-            $file_name = sprintf('/mydata/audio/%s第%s章.mp3', $volume_info['full_name'], $volume_info['volume_id']);
+            $file_name = sprintf('/mydata/audio/%s第%s章.mp3', $volume_info['full_name'], $volume_info['chapter_no']);
             echo '开始处理文件' . $file_name . "\n";
             if(!is_file($file_name)) {
                 continue;
