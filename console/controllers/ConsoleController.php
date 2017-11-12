@@ -90,8 +90,8 @@ class ConsoleController extends yii\console\Controller
             ->select('a.full_name, b.volume_id, b.chapter_no')
             ->from('public.volume a')
             ->innerJoin('public.scriptures b', 'a.id = b.volume_id')
-            ->groupBy('b.volume_id, b.chapter_no')
-            ->orderBy('b.volume_id, b.chapter_no asc')
+            ->groupBy('a.full_name, b.volume_id, b.chapter_no')
+            ->orderBy('a.full_name, b.volume_id, b.chapter_no asc')
             ->all();
         foreach($volume_list as $volume_info) {
             mkdir('/mydata/audio/' . $volume_info['volume_id']);
