@@ -80,4 +80,31 @@ class ConsoleController extends yii\console\Controller
             }
         }
     }
+
+    /**
+     * 转义圣经文件名为数字
+     */
+    public function actionEscape()
+    {
+        $volume_list = Volume::find()
+            ->select('a.full_name, b.volume_id, b.chapter_no')
+            ->from('public.volume a')
+            ->innerJoin('public.scriptures b', 'a.id = b.volume_id')
+            ->groupBy('b.volume_id, b.chapter_no')
+            ->orderBy('b.volume_id, b.chapter_no asc')
+            ->all();
+        foreach($volume_list as $volume_info) {
+            mkdir('/mydata/audio/' . $volume_info['volume_id']);
+            $file_name = sprintf('/mydata/audio/%s%s.mp3', $volume_info['full_name'], str_pad($volume_info['id'], 2, 0, STR_PAD_LEFT));
+            if(!is_file($file_name)) {
+                continue;
+            }
+            $is = rename($file_name, sprintf('/mydata/audio/%d/%s.mp3', $volume_info['volume_id'], $volume_info['chapter_no']));
+            if($is) {
+                echo '文件`'.$file_name.'`移动成功';
+            }else {
+                echo '文件`'.$file_name.'`移动失败';
+            }
+        }
+    }
 }
