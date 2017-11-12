@@ -86,13 +86,7 @@ class ConsoleController extends yii\console\Controller
      */
     public function actionEscape()
     {
-        $volume_list = Volume::find()
-            ->select('a.full_name, b.volume_id, b.chapter_no')
-            ->from('public.volume a')
-            ->innerJoin('public.scriptures b', 'a.id = b.volume_id')
-            ->groupBy('a.full_name, b.volume_id, b.chapter_no')
-            ->orderBy('a.full_name, b.volume_id, b.chapter_no asc')
-            ->all();
+        $volume_list = Volume::volumeList();
         foreach($volume_list as $volume_info) {
             mkdir('/mydata/audio/' . $volume_info['volume_id']);
             $file_name = sprintf('/mydata/audio/%s%s.mp3', $volume_info['full_name'], str_pad($volume_info['id'], 2, 0, STR_PAD_LEFT));
