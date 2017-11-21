@@ -696,7 +696,7 @@ class WeChatController extends Controller
 
             $data = [
 //                'path' => '/path/以弗所书第1章.mp3',
-                'second' => $info['seconds']
+                'second' => str_replace("\n", "", $info['seconds'])
             ];
 
             return $this->code(200, '', $data);
