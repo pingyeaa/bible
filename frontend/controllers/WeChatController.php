@@ -8,6 +8,7 @@ use common\models\ReciteContent;
 use common\models\ReciteRecord;
 use common\models\ReciteTopic;
 use common\models\Scriptures;
+use common\models\ScripturesTime;
 use common\models\User;
 use common\models\Volume;
 use common\models\WechatIgnoreRecord;
@@ -688,9 +689,14 @@ class WeChatController extends Controller
                 return $this->code(426, '`token`已过期');
             }
 
+            $info = ScripturesTime::find()->where(['volume_id' => $volume_id, 'chapter_no' => $chapter_no])->one();
+            if(!$info) {
+                return $this->code(451, '未找到该经文的音频时间', []);
+            }
+
             $data = [
 //                'path' => '/path/以弗所书第1章.mp3',
-                'second' => [0, 25, 60, 102]
+                'second' => $info['seconds']
             ];
 
             return $this->code(200, '', $data);
