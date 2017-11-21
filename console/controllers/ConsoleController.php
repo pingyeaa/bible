@@ -5,6 +5,7 @@ namespace console\controllers;
 use common\models\AskedDaily;
 use common\models\NickList;
 use common\models\Scriptures;
+use common\models\ScripturesTime;
 use common\models\Volume;
 use yii;
 
@@ -102,6 +103,21 @@ class ConsoleController extends yii\console\Controller
             }else {
                 echo '文件`'.$file_name.'`移动失败' . "\n";
             }
+        }
+    }
+
+    /**
+     * 导入圣经音频时间表
+     */
+    public function actionImportAudioSeconds()
+    {
+        $scripture_time = new ScripturesTime();
+        $file = fopen('/mydata/圣经经文时间表.txt', 'r');
+        while(!feof($file)) {
+            $line = fgets($file);
+            $array = explode(' ', $line);
+            list($volume_id, $chapter_no, $seconds) = $array;
+            $scripture_time->add(['volume_id' => $volume_id, 'chapter_no' => $chapter_no, 'seconds' => $seconds]);
         }
     }
 }
