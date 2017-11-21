@@ -117,7 +117,7 @@ class ConsoleController extends yii\console\Controller
             $line = fgets($file);
             $array = explode(' ', $line);
             list($volume_id, $chapter_no, $seconds) = $array;
-            $scripture_time->add(['volume_id' => $volume_id, 'chapter_no' => $chapter_no, 'seconds' => $seconds]);
+            $scripture_time->add($volume_id, $chapter_no, $seconds);
         }
     }
 }

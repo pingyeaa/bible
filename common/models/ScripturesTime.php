@@ -18,10 +18,10 @@ class ScripturesTime extends ActiveRecord
         ];
     }
 
-    public function add($data)
+    public function add($volume_id, $chapter_no, $seconds)
     {
-        $this->isNewRecord = true;
-        $this->attributes = $data;
-        return $this->save();
+        $sql = "INSERT INTO public.scriptures_time (volume_id, chapter_no, seconds) VALUES (%s, %s, '%s')";
+        $sql = sprintf($sql, $volume_id, $chapter_no, $seconds);
+        return $this->getDb()->createCommand($sql)->execute();
     }
 }
