@@ -14,7 +14,7 @@ class ScripturesTime extends ActiveRecord
     public function rules()
     {
         return [
-            ['volume_id', 'chapter_no', 'seconds']
+            [['volume_id', 'chapter_no', 'seconds'], 'safe']
         ];
     }
 
