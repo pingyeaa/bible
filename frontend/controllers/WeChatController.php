@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\Annotation;
+use common\models\ApiLog;
 use common\models\Friends;
 use common\models\ReciteContent;
 use common\models\ReciteRecord;
@@ -18,7 +19,8 @@ use yii\web\Controller;
 
 class WeChatController extends Controller
 {
-
+    protected $startMemory;
+    protected $startTime;
     protected $app_id = 'wxae67eaeeb26d373a';
     protected $app_secret = 'ef596cee9d5cf302f80ebc1d4b79fd25';
     protected $gz_app_id = 'wx48681fe10962eb3b';
@@ -28,7 +30,13 @@ class WeChatController extends Controller
 
     public function beforeAction($action)
     {
+        parent::beforeAction($action);
         session_start();
+
+        //初始化内存、时间，用于计算内存消耗
+        $this->startMemory = memory_get_usage();
+        $this->startTime = microtime(true);
+
         return true;
     }
 
@@ -731,6 +739,24 @@ class WeChatController extends Controller
             'data' => $data
         ];
         $response->data = $output;
+        $this->log($response);
         \yii::$app->end(0, $response);
+    }
+
+    protected function log($response)
+    {
+        $log = new ApiLog();
+        $log->add([
+            'route' => $this->route,
+            'request_type' => \yii::$app->request->method,
+            'url' => \yii::$app->request->absoluteUrl,
+            'params' => urldecode(http_build_query($_REQUEST)),
+            'status' => $response->statusCode,
+            'response' => json_encode($response->data, JSON_UNESCAPED_UNICODE),
+            'ip' => \yii::$app->request->getUserIP(),
+            'created_at' => time(),
+            'memory' => (memory_get_usage() - $this->startMemory) / 1000,
+            'response_time' => sprintf('%.2f', (microtime(true) - $this->startTime)),
+        ]);
     }
 }
