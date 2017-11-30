@@ -306,7 +306,7 @@ class WeChatController extends Controller
                 \Yii::$app->redis->set($token, $user_id, 'EX', 3600);
             }
 
-            return $this->code(200, '', ['token' => $token, 'invitation_code' => $user_id]);
+            return $this->code(200, '', ['token' => $token, 'invitation_code' => $user_id, 'player' => ['show' => 0]]);
         }catch (\Exception $e) {
             return $this->code(500, $e->getMessage());
         }
