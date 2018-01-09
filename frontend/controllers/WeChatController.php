@@ -767,6 +767,40 @@ class WeChatController extends Controller
     }
 
     /**
+     * 好友列表
+     */
+    public function actionFriends($token)
+    {
+        try {
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
+
+            $list = Friends::listByRecitedDays($this->user_id, 1, 10);
+            $data = [];
+            foreach($list as $info) {
+                $user_info = User::find()->where(['id' => $info['friend_user_id']])->one();
+                $recite_info = Friends::todayRecitedInfo($info['friend_user_id']);
+                $data[] = [
+                    'user_id' => $user_info['id'],
+                    'nickname' => (String)$user_info['nickname'],
+                    'portrait' => (String)$user_info['portrait'],
+                    'is_recited' => $recite_info ? 1 : 0,
+                    'recited_time' => $recite_info ? date('Y-m-d H:i:s', $recite_info['created_at']) : '',
+                    'topic_id' => $recite_info ? $recite_info['topic_id'] : 0,
+                    'days' => $info['total'],
+                ];
+            }
+
+            return $this->code(200, '', $data);
+
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
      * 权限验证
      * @param $token
      * @return string openid

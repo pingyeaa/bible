@@ -138,4 +138,40 @@ class Friends extends ActiveRecord
         $sql = sprintf($sql, $user_id, strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59')));
         return self::getDb()->createCommand($sql)->queryAll();
     }
+
+    /**
+     * 获取按累计天数背诵从高到低排序的好友列表
+     * @param $user_id
+     * @return array
+     */
+    public static function listByRecitedDays($user_id, $page_no, $limit)
+    {
+        $sql = "
+            SELECT COUNT(b.id) AS total, a.friend_user_id FROM public.friends a 
+            LEFT JOIN public.wechat_recite_record b ON a.friend_user_id = b.user_id 
+            WHERE a.user_id = %d 
+            GROUP BY to_char(to_timestamp(b.created_at), 'yyyy-MM-dd'), a.friend_user_id 
+            ORDER BY total DESC 
+            LIMIT %d OFFSET %d 
+        ";
+        $sql = sprintf($sql, $user_id, $limit, ($page_no - 1)*$limit);
+        return self::getDb()->createCommand($sql)->queryAll();
+    }
+
+    /**
+     * 查询某人今天背诵情况
+     * @param $user_id
+     * @return array|bool
+     */
+    public static function todayRecitedInfo($user_id)
+    {
+        $sql = "
+            SELECT * FROM public.wechat_recite_record 
+            WHERE user_id = %d AND created_at BETWEEN '%s' AND '%s' 
+            ORDER BY id DESC 
+            LIMIT 1 
+        ";
+        $sql = sprintf($sql, $user_id, strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59')));
+        return self::getDb()->createCommand($sql)->queryOne();
+    }
 }
