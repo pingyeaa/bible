@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use common\models\AskedDaily;
+use common\models\Friends;
 use common\models\NickList;
 use common\models\Scriptures;
 use common\models\ScripturesTime;
@@ -118,6 +119,30 @@ class ConsoleController extends yii\console\Controller
             $array = explode(' ', $line);
             list($volume_id, $chapter_no, $seconds) = $array;
             $scripture_time->add($volume_id, $chapter_no, $seconds);
+        }
+    }
+
+    /**
+     * 修复朋友关系
+     */
+    public function actionFixFriends()
+    {
+        for($i = 1; $i < 908; $i++) {
+            $info = Friends::find()->where(['id' => $i])->one();
+            $is = Friends::find()->where(['user_id' => $info['friend_user_id'], 'friend_user_id' => $info['user_id']])->one();
+            if(!$is) {
+                $friends = new Friends();
+                $is = $friends->add([
+                    'user_id' => $info['friend_user_id'],
+                    'friend_user_id' => $info['user_id'],
+                    'created_at' => time(),
+                    'updated_at' => time(),
+                ]);
+                if(!$is) {
+                    echo $i . "修复失败\n";
+                }
+                echo $i . "修复成功\n";
+            }
         }
     }
 }
