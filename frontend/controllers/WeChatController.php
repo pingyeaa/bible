@@ -553,7 +553,7 @@ class WeChatController extends Controller
     }
 
     /**
-     * 完成复习接口
+     * 邀请
      * @param $token
      * @param $invitation_code string 邀请码
      */
@@ -566,12 +566,10 @@ class WeChatController extends Controller
             }
 
             if($this->user_id == $invitation_code) {
-                return $this->code(200, '不能关注自己，已忽略');
+                return $this->code(200, '不能加自己为好友，已忽略');
             }
 
-            //被关注的人是`target_user_id`
-            //应该保存在`user_id`字段
-            //因为你关注别人你就是别人的朋友了
+            //点击邀请码需要互加好友
             $friends = new Friends();
             $friendInfo = Friends::findByFriendIdAndUserId((int)$invitation_code, $this->user_id);
             if(!$friendInfo) {
@@ -585,8 +583,19 @@ class WeChatController extends Controller
                     throw new \Exception(json_encode($friends->getErrors()));
                 }
             }
-            $this->code(200, '', []);
-
+            $friends = new Friends();
+            $friendInfo = Friends::findByFriendIdAndUserId($this->user_id, (int)$invitation_code);
+            if(!$friendInfo) {
+                $is = $friends->add([
+                    'user_id' => $invitation_code,
+                    'friend_user_id' => $this->user_id,
+                    'created_at' => time(),
+                    'updated_at' => time(),
+                ]);
+                if(!$is) {
+                    throw new \Exception(json_encode($friends->getErrors()));
+                }
+            }
             return $this->code(200, '');
 
         }catch (\Exception $e) {
