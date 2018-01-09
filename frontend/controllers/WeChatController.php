@@ -737,9 +737,33 @@ class WeChatController extends Controller
     /**
      * 今天已经完成背诵的朋友
      */
-    public function actionTodayRecitedFriends()
+    public function actionTodayRecitedFriends($token)
     {
+        try {
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
 
+            $friends = Friends::findTodayRecitedFriends($this->user_id);
+            if(!$friends) {
+                return $this->code(200, '', []);
+            }
+            $data = [];
+            foreach($friends as $info) {
+                $user_info = User::find()->where(['id' => $info['friend_user_id']])->one();
+                $data[] = [
+                    'nickname' => $user_info['nickname'],
+                    'portrait' => $user_info['portrait'],
+                    'time' => date('Y-m-d H:i:s', $info['created_at']),
+                ];
+            }
+
+            return $this->code(200, '', $data);
+
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
     }
 
     /**

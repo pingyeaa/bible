@@ -122,4 +122,20 @@ class Friends extends ActiveRecord
         $sql = sprintf($sql, $userId);
         return self::getDb()->createCommand($sql)->queryAll();
     }
+
+    /**
+     * 查询今日已背诵过的用户
+     */
+    public static function findTodayRecitedFriends($user_id)
+    {
+        $sql = "
+            SELECT a.friend_user_id, b.created_at FROM public.friends a 
+            INNER JOIN public.wechat_recite_record b ON a.friend_user_id = b.user_id 
+            WHERE a.user_id = %d AND b.created_at BETWEEN '%s' AND '%s' 
+            ORDER BY b.created_at ASC 
+            LIMIT 10
+        ";
+        $sql = sprintf($sql, $user_id, strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59')));
+        return self::getDb()->createCommand($sql)->queryAll();
+    }
 }
