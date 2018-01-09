@@ -777,7 +777,7 @@ class WeChatController extends Controller
                 return $this->code(426, '`token`已过期');
             }
 
-            $list = Friends::listByRecitedDays($this->user_id, 1, 10);
+            $list = Friends::listByRecitedDays($this->user_id, 1, 20);
             $data = [];
             foreach($list as $info) {
                 $user_info = User::find()->where(['id' => $info['friend_user_id']])->one();
