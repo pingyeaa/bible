@@ -243,9 +243,11 @@ class WeChatController extends Controller
      * @param $code
      * @param string $encrypted_data
      * @param string $iv
+     * @param string $nickname
+     * @param string $portrait
      * @return mixed
      */
-    public function actionLogin($code, $encrypted_data = '', $iv = '')
+    public function actionLogin($code, $encrypted_data = '', $iv = '', $nickname = '', $portrait = '')
     {
         try {
             $ch = curl_init();
@@ -285,6 +287,8 @@ class WeChatController extends Controller
                     'openid' => $result['openid'],
                     'platform_id' => 1,
                     'nation_code' => 86,
+                    'nickname' => $nickname,
+                    'portrait' => $portrait,
                 ];
                 if($union_id) { $data['union_id'] = $union_id; }
                 $is = $user->add($data);
@@ -293,7 +297,14 @@ class WeChatController extends Controller
                 }
                 $user_id = $is;
             }else {
-                $data = ['last_login_at' => time()];
+                $data = [];
+                $data['last_login_at'] = time();
+                if($user_info['nickname'] != $nickname) {
+                    $data['nickname'] = $nickname;
+                }
+                if($user_info['portrait'] != $portrait) {
+                    $data['portrait'] = $portrait;
+                }
                 if($union_id) { $data['union_id'] = $union_id; }
                 User::mod($data, $user_info['id']);
                 $user_id = $user_info['id'];
@@ -721,6 +732,14 @@ class WeChatController extends Controller
         }catch (\Exception $e) {
             return $this->code(500, $e->getMessage());
         }
+    }
+
+    /**
+     * 今天已经完成背诵的朋友
+     */
+    public function actionTodayRecitedFriends()
+    {
+
     }
 
     /**
