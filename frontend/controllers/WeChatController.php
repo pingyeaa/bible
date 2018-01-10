@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\models\Annotation;
 use common\models\ApiLog;
 use common\models\Friends;
+use common\models\MessageCenter;
 use common\models\ReciteContent;
 use common\models\ReciteRecord;
 use common\models\ReciteTopic;
@@ -15,6 +16,7 @@ use common\models\Volume;
 use common\models\WechatIgnoreRecord;
 use common\models\WechatReciteRecord;
 use common\models\WechatReviewRecord;
+use yii\swiftmailer\Message;
 use yii\web\Controller;
 
 class WeChatController extends Controller
@@ -790,6 +792,119 @@ class WeChatController extends Controller
                     'recited_time' => $recite_info ? date('Y-m-d H:i:s', $recite_info['created_at']) : '',
                     'topic_id' => $recite_info ? $recite_info['topic_id'] : 0,
                     'days' => $info['total'],
+                ];
+            }
+
+            return $this->code(200, '', $data);
+
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 搜索用户
+     * @param $token
+     * @param $user_id
+     */
+    public function actionSearchUser($token, $user_id)
+    {
+        try {
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
+
+            $user_info = User::find()->where(['id' => $user_id])->one();
+            if(!$user_info) {
+                return $this->code(451, '未找到该用户');
+            }
+
+            $friend_info = Friends::find()->where(['user_id' => $this->user_id, 'friend_user_id' => $user_id])->one();
+
+            return $this->code(200, '', ['user_id' => $user_info['id'], 'nickname' => $user_info['nickname'], 'portrait' => (String)$user_info['portrait'], 'is_friend' => $friend_info ? 1 : 0]);
+
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 关注
+     * @param $token
+     * @param $user_id
+     */
+    public function actionFollow($token, $user_id)
+    {
+        try {
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
+
+            //检测是否已经关注
+            //未关注则添加关注
+            $friend_info = Friends::find()->where(['user_id' => $this->user_id, 'friend_user_id' => $user_id])->one();
+            if($friend_info) {
+                return $this->code(451, '已经关注对方', []);
+            }
+            $friends = new Friends();
+            $is = $friends->add([
+                'user_id' => $this->user_id,
+                'friend_user_id' => $user_id,
+                'created_at' => time(),
+                'updated_at' => time(),
+            ]);
+            if(!$is) {
+                throw new \Exception(\json_encode($friends->getErrors()));
+            }
+
+            $user_info = User::find()->where(['id' => $this->user_id])->one();
+
+            //添加到消息中心
+            $message = new MessageCenter();
+            $message->add([
+                'to_user' => $user_id,
+                'msg_content' => sprintf('%s关注了你，你也可以试试关注Ta', $user_info['nickname']),
+                'msg_type' => 2,    //1-评论通知；2-关注通知；3-点赞通知；4-系统通知
+                'created_time' => date('Y-m-d H:i:s'),
+            ]);
+
+            return $this->code(200, '', []);
+
+        }catch (\Exception $e) {
+            return $this->code(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 获取站内消息
+     * @param $token
+     */
+    public function actionMessageCenter($token, $page)
+    {
+        try {
+            $openid = $this->authorization($token);
+            if(!$openid) {
+                return $this->code(426, '`token`已过期');
+            }
+
+            $message_list = MessageCenter::find()
+                ->where(['to_user' => $this->user_id])
+                ->orderBy('id desc')
+                ->limit(20)
+                ->offset(($page - 1)*20)
+                ->all();
+            if(!$message_list) {
+                return $this->code(200, '', []);
+            }
+            $data = [];
+            foreach($message_list as $message) {
+                $data[] = [
+                    'id' => $message['id'],
+                    'msg_content' => $message['msg_content'],
+                    'msg_type' => $message['msg_type'],
+                    'created_time' => $message['created_time'],
                 ];
             }
 
