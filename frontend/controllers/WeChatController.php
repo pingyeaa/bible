@@ -940,7 +940,7 @@ class WeChatController extends Controller
             'data' => $data
         ];
         $response->data = $output;
-        $this->log($response);
+        //$this->log($response);
         \yii::$app->end(0, $response);
     }
 
